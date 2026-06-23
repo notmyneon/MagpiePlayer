@@ -298,6 +298,17 @@
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+    .closest-meta {
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
     .closest-score {
       color: var(--teal);
       font-size: 1rem;
@@ -549,6 +560,66 @@
       line-height: 1.35;
     }
 
+    .team-adjust-panel {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+      display: grid;
+      gap: 12px;
+    }
+    .team-adjust-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .team-adjust-list {
+      min-height: 96px;
+      max-height: 170px;
+      overflow: auto;
+      border-radius: 14px;
+      padding: 8px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .team-adjust-btn, .team-adjust-chip {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-radius: 12px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--white);
+      text-align: left;
+      font-size: .84rem;
+      font-weight: 850;
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
+    }
+    .team-adjust-btn:hover, .team-adjust-chip:hover {
+      background: rgba(0,213,199,.12);
+      border-color: rgba(0,213,199,.28);
+    }
+    .team-adjust-meta {
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .ranking-list-row.added-player {
+      background: linear-gradient(90deg, rgba(0,213,199,.20), rgba(255,255,255,.02));
+      box-shadow: inset 3px 0 0 rgba(0,213,199,.95);
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 1120px) { .hero, .grid { grid-template-columns: 1fr; } }
@@ -565,6 +636,7 @@
       .timeline-player-name { font-size: 1.85rem; white-space: normal; }
       .ranking-list-head, .ranking-list-row { grid-template-columns: 48px minmax(0, 1.9fr) 66px 56px 84px; }
       .manual-picker { grid-template-columns: 1fr; }
+      .team-adjust-grid { grid-template-columns: 1fr; }
       .actions button { width: 100%; }
     }
   </style>
@@ -809,7 +881,7 @@
                   <div class="score-rank" id="cardScoreRank">Position Rank —</div>
                 </div>
                 <div class="score-tile closest-tile">
-                  <div class="score-title">Closest Players</div>
+                  <div class="score-title">Comparables</div>
                   <div class="score-rank" id="cardClosestDetail">Same Position</div>
                   <div class="closest-list" id="cardClosestList">
                     <div class="closest-empty">Select a player</div>
@@ -917,6 +989,25 @@
               <label for="rankingHighlightTwo">Highlight Player 2</label>
               <select id="rankingHighlightTwo"><option value="">None</option></select>
             </div>
+            <div class="full" id="rankingTeamAdjustWrap">
+              <div class="team-adjust-panel">
+                <div class="team-adjust-grid">
+                  <div>
+                    <label for="rankingAddPlayerSearch">Add One Player From Another Team</label>
+                    <input id="rankingAddPlayerSearch" placeholder="Search player to add..." />
+                    <div class="team-adjust-list" id="rankingAddPlayerResults"></div>
+                  </div>
+                  <div>
+                    <label for="rankingRemovePlayerSearch">Remove Players From This Team</label>
+                    <input id="rankingRemovePlayerSearch" placeholder="Search player to remove..." />
+                    <div class="team-adjust-list" id="rankingRemovePlayerResults"></div>
+                  </div>
+                </div>
+                <div class="actions" style="margin-top:0;">
+                  <button class="secondary" id="clearRankingAdjustmentsBtn" type="button">Clear Team Adjustments</button>
+                </div>
+              </div>
+            </div>
             <div class="full hidden" id="rankingPlayersWrap">
               <label for="rankingManualTitle">Manual Ranking Title</label>
               <input id="rankingManualTitle" placeholder="Example: Best Defensive Forwards" />
@@ -990,6 +1081,8 @@
     let dataRevision = 0;
     let aggregateCache = null;
     let rankingManualPlayers = [];
+    let rankingAddedPlayer = '';
+    let rankingRemovedPlayers = [];
 
     const $ = id => document.getElementById(id);
 
@@ -1316,6 +1409,119 @@
       select.innerHTML = players.map(p => `<option value="${escapeAttr(p)}" selected>${escapeHtml(p)}</option>`).join('');
     }
 
+    function teamRowsForRankingContext() {
+      const year = clean($('rankingYearSelect')?.value);
+      const minGP = Math.max(0, num($('rankingMinGP')?.value));
+      const positionFilter = $('rankingPositionFilter')?.value || 'both';
+      const team = clean($('rankingTeamSelect')?.value);
+      const teamKey = team.toLowerCase();
+
+      let rows = aggregateRecords().filter(r => (!year || r.year === year) && r.gp >= minGP);
+      if (positionFilter !== 'both') rows = rows.filter(r => r.position === positionFilter);
+      if (team) rows = rows.filter(r => teamNamesForRank(r.team).includes(teamKey));
+      return rows;
+    }
+
+    function candidateRowsForTradeAdd() {
+      const year = clean($('rankingYearSelect')?.value);
+      const minGP = Math.max(0, num($('rankingMinGP')?.value));
+      const positionFilter = $('rankingPositionFilter')?.value || 'both';
+      const team = clean($('rankingTeamSelect')?.value);
+      const teamKey = team.toLowerCase();
+
+      let rows = aggregateRecords().filter(r => (!year || r.year === year) && r.gp >= minGP);
+      if (positionFilter !== 'both') rows = rows.filter(r => r.position === positionFilter);
+      if (team) rows = rows.filter(r => !teamNamesForRank(r.team).includes(teamKey));
+      return rows.sort((a,b) => a.player.localeCompare(b.player));
+    }
+
+    function renderRankingTeamAdjustments() {
+      const wrap = $('rankingTeamAdjustWrap');
+      if (!wrap) return;
+
+      const teamMode = $('rankingMode')?.value === 'team';
+      wrap.classList.toggle('hidden', !teamMode);
+
+      if (!teamMode) return;
+
+      const addBox = $('rankingAddPlayerResults');
+      const removeBox = $('rankingRemovePlayerResults');
+      if (!addBox || !removeBox) return;
+
+      const currentTeamRows = teamRowsForRankingContext();
+      rankingRemovedPlayers = rankingRemovedPlayers.filter(player =>
+        currentTeamRows.some(r => r.player === player)
+      );
+
+      const addQuery = clean($('rankingAddPlayerSearch')?.value).toLowerCase();
+      const addCandidates = candidateRowsForTradeAdd()
+        .filter(r => !addQuery || r.player.toLowerCase().includes(addQuery))
+        .slice(0, 30);
+
+      if (rankingAddedPlayer) {
+        const added = aggregateRecords().find(r => r.key === rankingAddedPlayer);
+        addBox.innerHTML = added
+          ? `<button class="team-adjust-chip" type="button" data-clear-added="true">
+              <span>Added: ${escapeHtml(added.player)}</span>
+              <span class="team-adjust-meta">${escapeHtml(displayTeamAbbreviation(added.team) || '—')} • Remove</span>
+            </button>`
+          : '<div class="manual-empty">Added player no longer matches the selected year.</div>';
+      } else if (!addCandidates.length) {
+        addBox.innerHTML = '<div class="manual-empty">No outside players match this search.</div>';
+      } else {
+        addBox.innerHTML = addCandidates.map(r => `
+          <button class="team-adjust-btn" type="button" data-add-key="${escapeAttr(r.key)}">
+            <span>${escapeHtml(r.player)}</span>
+            <span class="team-adjust-meta">${escapeHtml(displayTeamAbbreviation(r.team) || '—')} • ${escapeHtml(positionShort(r.position))} • ${whole(r.gp)} GP</span>
+          </button>
+        `).join('');
+      }
+
+      const removeQuery = clean($('rankingRemovePlayerSearch')?.value).toLowerCase();
+      const removeCandidates = currentTeamRows
+        .filter(r => !removeQuery || r.player.toLowerCase().includes(removeQuery))
+        .slice(0, 40);
+
+      if (!removeCandidates.length) {
+        removeBox.innerHTML = '<div class="manual-empty">No team players match this search.</div>';
+      } else {
+        removeBox.innerHTML = removeCandidates.map(r => {
+          const removed = rankingRemovedPlayers.includes(r.player);
+          return `<button class="team-adjust-btn" type="button" data-remove-player="${escapeAttr(r.player)}">
+            <span>${escapeHtml(removed ? 'Removed: ' : '')}${escapeHtml(r.player)}</span>
+            <span class="team-adjust-meta">${removed ? 'Add Back' : `${escapeHtml(positionShort(r.position))} • ${whole(r.gp)} GP`}</span>
+          </button>`;
+        }).join('');
+      }
+
+      addBox.querySelectorAll('[data-add-key]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          rankingAddedPlayer = btn.dataset.addKey || '';
+          renderRankingCard();
+        });
+      });
+
+      addBox.querySelectorAll('[data-clear-added]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          rankingAddedPlayer = '';
+          renderRankingCard();
+        });
+      });
+
+      removeBox.querySelectorAll('[data-remove-player]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const player = btn.dataset.removePlayer;
+          if (!player) return;
+          if (rankingRemovedPlayers.includes(player)) {
+            rankingRemovedPlayers = rankingRemovedPlayers.filter(p => p !== player);
+          } else {
+            rankingRemovedPlayers.push(player);
+          }
+          renderRankingCard();
+        });
+      });
+    }
+
     function renderManualPlayerPicker() {
       const resultsBox = $('rankingSearchResults');
       const selectedBox = $('rankingSelectedPlayers');
@@ -1481,7 +1687,7 @@
         $('cardSub').textContent = 'Forward • Team • GP';
         $('cardScore').textContent = '0.00';
         $('cardScoreRank').textContent = 'Position Rank —';
-        $('cardClosestDetail').textContent = 'Same Position';
+        $('cardClosestDetail').textContent = 'Same Position • Any Year';
         $('cardClosestList').innerHTML = '<div class="closest-empty">Select a player</div>';
         $('statHits').textContent = '0'; $('rankHits').textContent = '—/—';
         $('statBlocks').textContent = '0'; $('rankBlocks').textContent = '—/—';
@@ -1497,8 +1703,13 @@
       const blockRanks = rankMap(group, x => x.blocked, 'desc');
       const takeawayRanks = rankMap(group, x => x.takeaways, 'desc');
 
-      const closestPlayers = group
-        .filter(x => x.key !== r.key)
+      const comparablePool = aggregateRecords().filter(x =>
+        x.position === r.position &&
+        x.gp >= minGP &&
+        x.key !== r.key
+      );
+
+      const closestPlayers = comparablePool
         .map(x => ({ ...x, scoreDiff: Math.abs(x.score - r.score) }))
         .sort((a,b) => (a.scoreDiff - b.scoreDiff) || (b.score - a.score) || a.player.localeCompare(b.player))
         .slice(0, 5);
@@ -1507,11 +1718,14 @@
       $('cardSub').textContent = `${r.position} • ${r.team || 'Team —'} • ${whole(r.gp)} GP`;
       $('cardScore').textContent = fmt(r.score);
       $('cardScoreRank').textContent = positionRankText(scoreRanks.get(r.key), group.length, r.position);
-      $('cardClosestDetail').textContent = `${r.position} • ${r.year}`;
+      $('cardClosestDetail').textContent = `${r.position} • Any Year`;
       $('cardClosestList').innerHTML = closestPlayers.length
         ? closestPlayers.map(player => `
             <div class="closest-row">
-              <div class="closest-name">${escapeHtml(player.player)}</div>
+              <div>
+                <div class="closest-name">${escapeHtml(player.player)}</div>
+                <div class="closest-meta">${escapeHtml(player.year)} • ${escapeHtml(player.team || 'Team —')}</div>
+              </div>
               <div class="closest-score">${fmt(player.score)}</div>
             </div>
           `).join('')
@@ -1771,7 +1985,9 @@
       const manualMode = $('rankingMode').value === 'manual';
       $('rankingPlayersWrap').classList.toggle('hidden', !manualMode);
       $('rankingTeamWrap').classList.toggle('hidden', manualMode);
+      if ($('rankingTeamAdjustWrap')) $('rankingTeamAdjustWrap').classList.toggle('hidden', manualMode);
       renderManualPlayerPicker();
+      renderRankingTeamAdjustments();
     }
 
     function buildRankingRows() {
@@ -1791,12 +2007,32 @@
           const teamKey = team.toLowerCase();
           rows = rows.filter(r => teamNamesForRank(r.team).includes(teamKey));
 
+          if (rankingRemovedPlayers.length) {
+            rows = rows.filter(r => !rankingRemovedPlayers.includes(r.player));
+          }
+
+          if (rankingAddedPlayer) {
+            const added = aggregateRecords().find(r => r.key === rankingAddedPlayer);
+            if (
+              added &&
+              (!year || added.year === year) &&
+              added.gp >= minGP &&
+              (positionFilter === 'both' || added.position === positionFilter) &&
+              !rows.some(r => r.key === added.key)
+            ) {
+              rows.push({ ...added, addedToTeam: true, simulatedTeam: team });
+            }
+          }
+
           const teamTitleBase = displayTeamName(team);
           if (positionFilter === 'Forward') title = `${teamTitleBase} - Forwards • ${year || 'All Years'}`;
           else if (positionFilter === 'Defence') title = `${teamTitleBase} - Defence • ${year || 'All Years'}`;
           else title = `${teamTitleBase} • ${year || 'All Years'}`;
 
-          subtitle = `Minimum ${whole(minGP)} GP`;
+          const notes = [];
+          if (rankingAddedPlayer) notes.push('+1 added');
+          if (rankingRemovedPlayers.length) notes.push(`${rankingRemovedPlayers.length} removed`);
+          subtitle = `Minimum ${whole(minGP)} GP${notes.length ? ' • ' + notes.join(' • ') : ''}`;
         } else {
           rows = [];
           title = year ? `Select a Team • ${year}` : 'Select a Team';
@@ -1875,13 +2111,16 @@
       }
 
       body.innerHTML = rows.map(r => {
-        const rowClass = r.player === highlightOne ? 'highlight-1' : (r.player === highlightTwo ? 'highlight-2' : '');
+        const highlightClass = r.player === highlightOne ? 'highlight-1' : (r.player === highlightTwo ? 'highlight-2' : '');
+        const addedClass = r.addedToTeam ? 'added-player' : '';
+        const rowClass = `${highlightClass} ${addedClass}`.trim();
+        const teamLabel = r.addedToTeam ? (displayTeamAbbreviation(r.simulatedTeam) || displayTeamAbbreviation(r.team) || '—') : (displayTeamAbbreviation(r.team) || '—');
         return `
         <div class="ranking-list-row ${rowClass}">
           <div><span class="ranking-rank-badge">#${r.displayRank}</span></div>
           <div class="ranking-player-cell">
             <div class="ranking-player-name">${escapeHtml(r.player)}</div>
-            <div class="ranking-player-meta">${escapeHtml(displayTeamAbbreviation(r.team) || '—')}</div>
+            <div class="ranking-player-meta">${escapeHtml(teamLabel)}${r.addedToTeam ? ' +' : ''}</div>
           </div>
           <div>${escapeHtml(positionShort(r.position))}</div>
           <div>${whole(r.gp)}</div>
@@ -2283,7 +2522,7 @@
       renderTimelineCard();
     });
 
-    ['rankingMode','rankingYearSelect','rankingTeamSelect','rankingMinGP','rankingPositionFilter','rankingHighlightOne','rankingHighlightTwo','rankingManualTitle','rankingPlayerSearch'].forEach(id => {
+    ['rankingMode','rankingYearSelect','rankingTeamSelect','rankingMinGP','rankingPositionFilter','rankingHighlightOne','rankingHighlightTwo','rankingManualTitle','rankingPlayerSearch','rankingAddPlayerSearch','rankingRemovePlayerSearch'].forEach(id => {
       $(id).addEventListener('change', renderRankingCard);
       $(id).addEventListener('input', renderRankingCard);
     });
@@ -2309,6 +2548,14 @@
       renderRankingCard();
       $('rankingYearSelect').value = selected.year;
       if (!rankingManualPlayers.includes(selected.player)) rankingManualPlayers.push(selected.player);
+      renderRankingCard();
+    });
+
+    $('clearRankingAdjustmentsBtn').addEventListener('click', () => {
+      rankingAddedPlayer = '';
+      rankingRemovedPlayers = [];
+      $('rankingAddPlayerSearch').value = '';
+      $('rankingRemovePlayerSearch').value = '';
       renderRankingCard();
     });
 
