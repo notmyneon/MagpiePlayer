@@ -304,10 +304,15 @@
       font-weight: 800;
       letter-spacing: .04em;
       text-transform: uppercase;
-      margin-top: 2px;
-      overflow: hidden;
+      margin-left: 8px;
+      flex: 0 0 auto;
       white-space: nowrap;
-      text-overflow: ellipsis;
+    }
+    .closest-label {
+      display: flex;
+      align-items: baseline;
+      min-width: 0;
+      overflow: hidden;
     }
     .closest-score {
       color: var(--teal);
@@ -1687,7 +1692,7 @@
         $('cardSub').textContent = 'Forward • Team • GP';
         $('cardScore').textContent = '0.00';
         $('cardScoreRank').textContent = 'Position Rank —';
-        $('cardClosestDetail').textContent = 'Same Position • Any Year';
+        $('cardClosestDetail').textContent = 'Same Position';
         $('cardClosestList').innerHTML = '<div class="closest-empty">Select a player</div>';
         $('statHits').textContent = '0'; $('rankHits').textContent = '—/—';
         $('statBlocks').textContent = '0'; $('rankBlocks').textContent = '—/—';
@@ -1718,11 +1723,11 @@
       $('cardSub').textContent = `${r.position} • ${r.team || 'Team —'} • ${whole(r.gp)} GP`;
       $('cardScore').textContent = fmt(r.score);
       $('cardScoreRank').textContent = positionRankText(scoreRanks.get(r.key), group.length, r.position);
-      $('cardClosestDetail').textContent = `${r.position} • Any Year`;
+      $('cardClosestDetail').textContent = `${r.position}`;
       $('cardClosestList').innerHTML = closestPlayers.length
         ? closestPlayers.map(player => `
             <div class="closest-row">
-              <div>
+              <div class="closest-label">
                 <div class="closest-name">${escapeHtml(player.player)}</div>
                 <div class="closest-meta">${escapeHtml(player.year)} • ${escapeHtml(player.team || 'Team —')}</div>
               </div>
