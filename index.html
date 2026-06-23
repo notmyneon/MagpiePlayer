@@ -279,6 +279,40 @@
     .score-number { margin-top: 8px; color: var(--teal); font-size: clamp(2.4rem, 5.2vw, 4.95rem); line-height: .86; font-weight: 1000; letter-spacing: -.08em; }
     .score-rank { margin-top: 8px; display: inline-flex; width: fit-content; padding: 5px 9px; border-radius: 999px; background: rgba(0,0,0,.32); border: 1px solid rgba(255,255,255,.11); color: var(--white); font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 950; }
 
+    .closest-tile { justify-content: flex-start; }
+    .closest-list { margin-top: 10px; display: grid; gap: 6px; }
+    .closest-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 4px 0;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .closest-row:first-child { border-top: 0; }
+    .closest-name {
+      color: var(--white);
+      font-size: .92rem;
+      font-weight: 850;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .closest-score {
+      color: var(--teal);
+      font-size: 1rem;
+      font-weight: 1000;
+      letter-spacing: -.03em;
+    }
+    .closest-empty {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
     .card-bottom { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: end; }
     .card-stat { padding: 12px; min-height: 82px; border-radius: 16px; background: rgba(255,255,255,.075); border: 1px solid rgba(255,255,255,.11); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
     .stat-label { width: 100%; text-align: center; color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; }
@@ -774,10 +808,12 @@
                   <div class="score-number" id="cardScore">0.00</div>
                   <div class="score-rank" id="cardScoreRank">Position Rank —</div>
                 </div>
-                <div class="score-tile">
-                  <div class="score-title">Team Rank</div>
-                  <div class="score-number" id="cardTeamRank">—</div>
-                  <div class="score-rank" id="cardTeamRankDetail">Team Rank —</div>
+                <div class="score-tile closest-tile">
+                  <div class="score-title">Closest Players</div>
+                  <div class="score-rank" id="cardClosestDetail">Same Position</div>
+                  <div class="closest-list" id="cardClosestList">
+                    <div class="closest-empty">Select a player</div>
+                  </div>
                 </div>
               </div>
               <div class="card-bottom">
@@ -1445,8 +1481,8 @@
         $('cardSub').textContent = 'Forward • Team • GP';
         $('cardScore').textContent = '0.00';
         $('cardScoreRank').textContent = 'Position Rank —';
-        $('cardTeamRank').textContent = '—';
-        $('cardTeamRankDetail').textContent = 'Team Rank —';
+        $('cardClosestDetail').textContent = 'Same Position';
+        $('cardClosestList').innerHTML = '<div class="closest-empty">Select a player</div>';
         $('statHits').textContent = '0'; $('rankHits').textContent = '—/—';
         $('statBlocks').textContent = '0'; $('rankBlocks').textContent = '—/—';
         $('statTakeaways').textContent = '0'; $('rankTakeaways').textContent = '—/—';
@@ -1461,21 +1497,25 @@
       const blockRanks = rankMap(group, x => x.blocked, 'desc');
       const takeawayRanks = rankMap(group, x => x.takeaways, 'desc');
 
-      const teamNameSet = teamNamesForRank(r.team);
-      const teamGroup = aggregateRecords().filter(x =>
-        x.year === r.year &&
-        x.gp >= minGP &&
-        teamNamesForRank(x.team).some(team => teamNameSet.includes(team))
-      );
-      const teamScoreRanks = rankMap(teamGroup, x => x.score, 'desc');
-      const teamRank = teamScoreRanks.get(r.key);
+      const closestPlayers = group
+        .filter(x => x.key !== r.key)
+        .map(x => ({ ...x, scoreDiff: Math.abs(x.score - r.score) }))
+        .sort((a,b) => (a.scoreDiff - b.scoreDiff) || (b.score - a.score) || a.player.localeCompare(b.player))
+        .slice(0, 5);
 
       $('cardName').textContent = r.player;
       $('cardSub').textContent = `${r.position} • ${r.team || 'Team —'} • ${whole(r.gp)} GP`;
       $('cardScore').textContent = fmt(r.score);
       $('cardScoreRank').textContent = positionRankText(scoreRanks.get(r.key), group.length, r.position);
-      $('cardTeamRank').textContent = teamRank ? `#${teamRank}` : '—';
-      $('cardTeamRankDetail').textContent = teamRank ? `${r.year} • ${teamGroup.length} team players` : 'Team Rank —';
+      $('cardClosestDetail').textContent = `${r.position} • ${r.year}`;
+      $('cardClosestList').innerHTML = closestPlayers.length
+        ? closestPlayers.map(player => `
+            <div class="closest-row">
+              <div class="closest-name">${escapeHtml(player.player)}</div>
+              <div class="closest-score">${fmt(player.score)}</div>
+            </div>
+          `).join('')
+        : '<div class="closest-empty">No comparable players</div>';
 
       $('statHits').textContent = whole(r.hits);
       $('rankHits').textContent = statRankShort(hitRanks.get(r.key), group.length);
