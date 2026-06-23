@@ -280,7 +280,8 @@
     .score-rank { margin-top: 8px; display: inline-flex; width: fit-content; padding: 5px 9px; border-radius: 999px; background: rgba(0,0,0,.32); border: 1px solid rgba(255,255,255,.11); color: var(--white); font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 950; }
 
     .closest-tile { justify-content: flex-start; }
-    .closest-list { margin-top: 10px; display: grid; gap: 6px; }
+    #cardClosestDetail { display: none !important; }
+    .closest-list { margin-top: 4px; display: grid; gap: 6px; }
     .closest-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -887,7 +888,7 @@
                 </div>
                 <div class="score-tile closest-tile">
                   <div class="score-title">Comparables</div>
-                  <div class="score-rank" id="cardClosestDetail">Same Position</div>
+                  <div class="score-rank" id="cardClosestDetail"></div>
                   <div class="closest-list" id="cardClosestList">
                     <div class="closest-empty">Select a player</div>
                   </div>
@@ -1692,7 +1693,7 @@
         $('cardSub').textContent = 'Forward • Team • GP';
         $('cardScore').textContent = '0.00';
         $('cardScoreRank').textContent = 'Position Rank —';
-        $('cardClosestDetail').textContent = 'Same Position';
+        $('cardClosestDetail').textContent = '';
         $('cardClosestList').innerHTML = '<div class="closest-empty">Select a player</div>';
         $('statHits').textContent = '0'; $('rankHits').textContent = '—/—';
         $('statBlocks').textContent = '0'; $('rankBlocks').textContent = '—/—';
@@ -1723,7 +1724,7 @@
       $('cardSub').textContent = `${r.position} • ${r.team || 'Team —'} • ${whole(r.gp)} GP`;
       $('cardScore').textContent = fmt(r.score);
       $('cardScoreRank').textContent = positionRankText(scoreRanks.get(r.key), group.length, r.position);
-      $('cardClosestDetail').textContent = `${r.position}`;
+      $('cardClosestDetail').textContent = '';
       $('cardClosestList').innerHTML = closestPlayers.length
         ? closestPlayers.map(player => `
             <div class="closest-row">
