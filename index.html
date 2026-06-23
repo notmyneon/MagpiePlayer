@@ -2281,11 +2281,45 @@
       downloadCardPNG('rankingCard', base);
     });
 
-    load();
-    renderTable();
-    renderPlayerCard();
-    renderTimelineCard();
-    renderRankingCard();
+    async function loadHostedPlayerData() {
+      try {
+        const response = await fetch('data/player-data.csv', { cache: 'no-store' });
+        if (!response.ok) return false;
+
+        const text = await response.text();
+        const imported = csvRowsToRecords(parseCSV(text));
+
+        if (!imported.length) {
+          showImportStatus('Hosted CSV was found, but no player rows were imported.', true);
+          return false;
+        }
+
+        records = imported;
+        selectedKey = null;
+        markDataChanged();
+
+        // Save a copy in this browser as a fallback.
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        } catch {}
+
+        showImportStatus(`Loaded ${imported.length.toLocaleString()} rows from data/player-data.csv.`, true);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function init() {
+      load();
+      await loadHostedPlayerData();
+      renderTable();
+      renderPlayerCard();
+      renderTimelineCard();
+      renderRankingCard();
+    }
+
+    init();
   </script>
 </body>
 </html>
