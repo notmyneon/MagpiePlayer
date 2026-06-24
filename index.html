@@ -626,13 +626,56 @@
       box-shadow: inset 3px 0 0 rgba(0,213,199,.95);
     }
 
+
+    /* Player card balanced height: keeps ranks visible without a large empty bottom area */
+    .player-card {
+      min-height: 565px !important;
+      aspect-ratio: auto !important;
+      padding: 22px !important;
+    }
+    .player-card .card-content {
+      gap: 10px !important;
+      height: auto !important;
+    }
+    .player-card .card-name h3 {
+      font-size: clamp(1.75rem, 3.65vw, 3.15rem) !important;
+    }
+    .player-card .score-tile {
+      min-height: 108px !important;
+      padding: 13px 16px !important;
+    }
+    .player-card .score-number {
+      font-size: clamp(2.2rem, 4.75vw, 4.2rem) !important;
+    }
+    .player-card .closest-list {
+      gap: 4px !important;
+    }
+    .player-card .closest-row {
+      padding: 3px 0 !important;
+    }
+    .player-card .card-bottom {
+      align-items: stretch !important;
+    }
+    .player-card .card-stat {
+      min-height: 88px !important;
+      padding: 12px 10px !important;
+    }
+    .player-card .stat-value {
+      font-size: 1.36rem !important;
+    }
+    .player-card .stat-detail {
+      font-size: .76rem !important;
+      line-height: 1.12 !important;
+      white-space: nowrap;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 1120px) { .hero, .grid { grid-template-columns: 1fr; } }
     @media (max-width: 800px) {
       .wrap { width: min(100vw - 22px, 1440px); padding-top: 14px; }
       .form-grid, .toolbar, .stats-strip, .timeline-toolbar, .ranking-toolbar { grid-template-columns: 1fr; }
-      .player-card, .timeline-card { min-height: 650px; aspect-ratio: auto; padding: 20px; }
+      .player-card, .timeline-card { min-height: 720px; aspect-ratio: auto; padding: 20px; }
       .ranking-card { min-height: 0; aspect-ratio: auto; padding: 14px; }
       .score-grid, .card-bottom { grid-template-columns: 1fr; }
       .card-logo { width: 66px; height: 66px; flex-basis: 66px; }
@@ -2328,7 +2371,11 @@
       let width = 1200;
       let height = 675;
 
-      if (cardId === 'rankingCard') {
+      if (cardId === 'playerCard') {
+        width = 1200;
+        const currentHeight = Math.ceil(card.getBoundingClientRect().height || card.offsetHeight || 675);
+        height = Math.max(675, currentHeight);
+      } else if (cardId === 'rankingCard') {
         width = 1200;
         const currentHeight = Math.ceil(card.getBoundingClientRect().height || card.offsetHeight || 900);
         height = Math.max(500, currentHeight);
