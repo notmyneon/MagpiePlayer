@@ -576,13 +576,20 @@
       text-transform: uppercase;
       white-space: normal;
     }
+    .head-to-head-title .accent { color: var(--teal); }
     .head-to-head-subtitle {
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: .08em;
+      letter-spacing: .06em;
       font-weight: 900;
-      font-size: .78rem;
+      font-size: clamp(.66rem, 1.05vw, .86rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
     }
+    .head-to-head-subtitle.fit-sm { font-size: clamp(.60rem, .95vw, .78rem); letter-spacing: .05em; }
+    .head-to-head-subtitle.fit-xs { font-size: clamp(.54rem, .86vw, .70rem); letter-spacing: .04em; }
+    .head-to-head-subtitle.fit-xxs { font-size: clamp(.50rem, .78vw, .64rem); letter-spacing: .035em; }
     .head-to-head-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
@@ -2367,6 +2374,17 @@
       `;
     }
 
+    function fitHeadToHeadSubtitle(textValue) {
+      const el = $('headToHeadSubtitle');
+      if (!el) return;
+      el.textContent = textValue;
+      el.classList.remove('fit-sm','fit-xs','fit-xxs');
+      const len = String(textValue || '').length;
+      if (len > 54) el.classList.add('fit-xxs');
+      else if (len > 46) el.classList.add('fit-xs');
+      else if (len > 38) el.classList.add('fit-sm');
+    }
+
     function renderHeadToHeadCard() {
       if (!$('headToHeadBody')) return;
 
@@ -2379,9 +2397,9 @@
       const rowTwo = p2 && y2 ? rowForPlayerYear(p2, y2) : null;
 
       if (rowOne && rowTwo) {
-        $('headToHeadSubtitle').textContent = `${rowOne.player} ${rowOne.year} vs ${rowTwo.player} ${rowTwo.year}`;
+        fitHeadToHeadSubtitle(`${rowOne.player} ${rowOne.year} vs ${rowTwo.player} ${rowTwo.year}`);
       } else {
-        $('headToHeadSubtitle').textContent = 'Select two player seasons to compare directly';
+        fitHeadToHeadSubtitle('Select two player seasons to compare directly');
       }
 
       $('headToHeadBody').innerHTML = `
