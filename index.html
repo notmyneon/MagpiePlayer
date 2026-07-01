@@ -345,7 +345,10 @@
     .timeline-title { color: var(--white); font-size: clamp(1.3rem, 2.5vw, 2.35rem); line-height: .94; font-weight: 1000; letter-spacing: -.06em; text-transform: uppercase; white-space: normal; max-width: 100%; }
     .timeline-title .season { color: var(--teal); }
     .timeline-player-row { gap: 12px; }
-    .timeline-player-name { color: var(--white); font-size: clamp(1.35rem, 2.9vw, 2.7rem); line-height: .94; font-weight: 1000; letter-spacing: -.06em; text-transform: uppercase; white-space: normal; overflow: visible; text-overflow: initial; max-width: 100%; }
+    .timeline-player-name { color: var(--white); font-size: clamp(1.2rem, 2.6vw, 2.45rem); line-height: .94; font-weight: 1000; letter-spacing: -.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: clip; max-width: 100%; }
+    .timeline-player-name.fit-sm { font-size: clamp(1.06rem, 2.25vw, 2rem); }
+    .timeline-player-name.fit-xs { font-size: clamp(.94rem, 1.95vw, 1.7rem); letter-spacing: -.04em; }
+    .timeline-player-name.fit-xxs { font-size: clamp(.82rem, 1.65vw, 1.42rem); letter-spacing: -.03em; }
     .timeline-metric-label { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 900; font-size: .78rem; }
 
     .timeline-graph-wrap { border: 1px solid rgba(0,213,199,.24); background: linear-gradient(160deg, rgba(0,213,199,.10), rgba(255,255,255,.045)); border-radius: 22px; overflow: hidden; min-height: 250px; }
@@ -1215,7 +1218,7 @@
               <div class="timeline-top">
                 <div class="timeline-brand">
                   <div class="timeline-logo" id="timelineLogo"><span>MP</span></div>
-                  <div class="timeline-title">Magpie Score Player Comparison</div>
+                  <div class="timeline-title"><span class="season">Magpie Score</span><br>Player Comparison</div>
                 </div>
               </div>
               <div>
@@ -2411,6 +2414,17 @@
       `;
     }
 
+    function fitTimelinePlayerNames(textValue) {
+      const el = $('timelinePlayerNames');
+      if (!el) return;
+      el.textContent = textValue;
+      el.classList.remove('fit-sm','fit-xs','fit-xxs');
+      const len = String(textValue || '').length;
+      if (len > 44) el.classList.add('fit-xxs');
+      else if (len > 34) el.classList.add('fit-xs');
+      else if (len > 24) el.classList.add('fit-sm');
+    }
+
     function renderTimelineCard() {
       rebuildPlayerFilters();
       const p1 = $('timelinePlayerOne').value || selectedPlayerLabel();
@@ -2421,7 +2435,7 @@
       if (p1 && !$('timelinePlayerOne').value && [...$('timelinePlayerOne').options].some(o => o.value === p1)) $('timelinePlayerOne').value = p1;
 
       const names = [p1, p2].filter(Boolean);
-      $('timelinePlayerNames').textContent = names.length ? names.join('  vs  ') : 'Select Player';
+      fitTimelinePlayerNames(names.length ? names.join('  vs  ') : 'Select Player');
       $('legendOne').textContent = p1 || 'Player 1';
       $('legendTwo').textContent = p2 || 'Player 2';
       $('legendTwoWrap').style.display = p2 ? 'inline' : 'none';
