@@ -501,6 +501,221 @@
       padding: 24px;
     }
 
+    .head-to-head-toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+      margin-top: 22px;
+    }
+    .head-to-head-card {
+      position: relative;
+      width: 100%;
+      min-height: 650px;
+      aspect-ratio: auto;
+      overflow: hidden;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(0,213,199,.21), transparent 17rem),
+        linear-gradient(135deg, #050708 0%, #0c1416 47%, #020304 100%);
+      border: 1px solid rgba(0,213,199,.34);
+      box-shadow: 0 30px 95px rgba(0,0,0,.56), inset 0 0 0 1px rgba(255,255,255,.04);
+      padding: 24px;
+    }
+    .head-to-head-card:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(115deg, transparent 0 43%, rgba(0,213,199,.14) 43% 44.2%, transparent 44.2% 54%, rgba(255,255,255,.06) 54% 54.6%, transparent 54.6%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.033) 0 1px, transparent 1px 22px);
+      opacity: .72;
+      pointer-events: none;
+    }
+    .head-to-head-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 16px;
+    }
+    .head-to-head-title-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+    .head-to-head-logo {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+    }
+    .head-to-head-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 8px 20px rgba(0,213,199,.14));
+    }
+    .head-to-head-logo span {
+      color: var(--teal);
+      font-weight: 1000;
+      font-size: 1.5rem;
+      letter-spacing: -.08em;
+    }
+    .head-to-head-title {
+      color: var(--white);
+      font-size: clamp(1.6rem, 3.4vw, 3rem);
+      line-height: .92;
+      font-weight: 1000;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+      white-space: normal;
+    }
+    .head-to-head-subtitle {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 900;
+      font-size: .78rem;
+    }
+    .head-to-head-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+    .comparison-player-panel {
+      border-radius: 22px;
+      background: linear-gradient(160deg, rgba(0,213,199,.13), rgba(255,255,255,.045));
+      border: 1px solid rgba(0,213,199,.25);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+    }
+    .comparison-player-head {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.16);
+    }
+    .comparison-player-name {
+      color: var(--white);
+      font-size: clamp(1.35rem, 2.8vw, 2.35rem);
+      line-height: .95;
+      font-weight: 1000;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .comparison-player-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .76rem;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .comparison-stat-list {
+      display: grid;
+      grid-template-rows: repeat(5, minmax(0, 1fr));
+    }
+    .comparison-stat {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      min-width: 0;
+    }
+    .comparison-stat:last-child { border-bottom: 0; }
+    .comparison-stat-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: .72rem;
+      font-weight: 900;
+    }
+    .comparison-stat-value-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .comparison-stat-value {
+      color: var(--white);
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -.04em;
+    }
+    .comparison-stat-value.main {
+      color: var(--teal);
+      font-size: 1.7rem;
+    }
+    .comparison-percentile {
+      display: inline-flex;
+      width: fit-content;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.32);
+      border: 1px solid rgba(255,255,255,.11);
+      color: var(--muted);
+      font-size: .66rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .comparison-center {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .74rem;
+      font-weight: 1000;
+      text-align: center;
+    }
+    .comparison-vs {
+      width: 78px;
+      height: 78px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+      font-size: 1.55rem;
+      font-weight: 1000;
+      letter-spacing: -.05em;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(0,213,199,.34);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .comparison-empty {
+      display: grid;
+      place-items: center;
+      min-height: 340px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 900;
+      text-align: center;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid rgba(0,213,199,.24);
+      background: rgba(0,0,0,.20);
+    }
+
     .manual-picker {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -686,6 +901,10 @@
       .ranking-list-head, .ranking-list-row { grid-template-columns: 48px minmax(0, 1.9fr) 66px 56px 84px; }
       .manual-picker { grid-template-columns: 1fr; }
       .team-adjust-grid { grid-template-columns: 1fr; }
+      .head-to-head-toolbar { grid-template-columns: 1fr; }
+      .head-to-head-grid { grid-template-columns: 1fr; }
+      .comparison-center { min-height: 58px; }
+      .head-to-head-card { min-height: 980px; padding: 20px; }
       .actions button { width: 100%; }
     }
   </style>
@@ -999,6 +1218,42 @@
                 <span id="legendTwoWrap"><i class="legend-dot legend-two"></i><span id="legendTwo">Player 2</span></span>
                 <span><i class="legend-dot legend-average"></i>League Average</span>
               </div>
+            </div>
+          </article>
+
+          <div class="head-to-head-toolbar">
+            <div>
+              <label for="h2hPlayerOne">Player 1</label>
+              <select id="h2hPlayerOne"><option value="">Select player</option></select>
+            </div>
+            <div>
+              <label for="h2hYearOne">Player 1 Year</label>
+              <select id="h2hYearOne"><option value="">Select year</option></select>
+            </div>
+            <div>
+              <label for="h2hPlayerTwo">Player 2</label>
+              <select id="h2hPlayerTwo"><option value="">Select player</option></select>
+            </div>
+            <div>
+              <label for="h2hYearTwo">Player 2 Year</label>
+              <select id="h2hYearTwo"><option value="">Select year</option></select>
+            </div>
+          </div>
+
+          <div class="actions" style="justify-content:flex-end;margin-top:10px;">
+            <button class="secondary" id="useSelectedH2HOneBtn" type="button">Use Selected as Player 1</button>
+            <button class="secondary" id="useSelectedH2HTwoBtn" type="button">Use Selected as Player 2</button>
+            <button class="secondary" id="downloadH2HCardBtn" type="button">Download Comparison PNG</button>
+          </div>
+
+          <article class="head-to-head-card" id="headToHeadCard">
+            <div class="head-to-head-content">
+              <div class="head-to-head-title-row">
+                <div class="head-to-head-logo" id="headToHeadLogo"><span>MP</span></div>
+                <div class="head-to-head-title">Side By Side Player Comparison</div>
+              </div>
+              <div class="head-to-head-subtitle" id="headToHeadSubtitle">Select two player seasons to compare directly</div>
+              <div id="headToHeadBody"></div>
             </div>
           </article>
 
@@ -1807,6 +2062,50 @@
       return Number.isFinite(v) ? v : null;
     }
 
+    function ordinalSuffix(n) {
+      const value = Math.round(num(n));
+      const mod10 = value % 10;
+      const mod100 = value % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${value}st`;
+      if (mod10 === 2 && mod100 !== 12) return `${value}nd`;
+      if (mod10 === 3 && mod100 !== 13) return `${value}rd`;
+      return `${value}th`;
+    }
+
+    function percentileText(row, metric) {
+      if (!row || !Number.isFinite(row[metric])) return '—';
+      const group = aggregateRecords().filter(r =>
+        r.year === row.year &&
+        r.position === row.position &&
+        Number.isFinite(r[metric])
+      );
+      if (!group.length) return '—';
+
+      const lowerOrEqual = group.filter(r => r[metric] <= row[metric]).length;
+      const percentile = Math.round((lowerOrEqual / group.length) * 100);
+      return `${ordinalSuffix(percentile)} pct`;
+    }
+
+    function rowForPlayerYear(player, year) {
+      const playerKeyValue = playerKey(player);
+      const rows = aggregateRecords().filter(r => r.playerKey === playerKeyValue && r.year === year);
+      if (!rows.length) return null;
+      return rows.sort((a,b) => b.gp - a.gp)[0];
+    }
+
+    function h2hPlayerOptions() {
+      return allPlayerNames().map(p => `<option value="${escapeAttr(p)}">${escapeHtml(p)}</option>`).join('');
+    }
+
+    function h2hYearsForPlayer(player) {
+      return aggregateRecords()
+        .filter(r => r.player === player)
+        .map(r => r.year)
+        .filter(Boolean)
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .sort((a,b) => yearSortValue(b) - yearSortValue(a) || String(b).localeCompare(String(a)));
+    }
+
     function playerPrimaryPosition(player) {
       const rows = aggregateRecords().filter(r => r.player === player);
       if (!rows.length) return 'Forward';
@@ -1975,6 +2274,110 @@
       });
 
       $('timelineSvg').innerHTML = html;
+    }
+
+    function rebuildH2HControls() {
+      const playerOne = $('h2hPlayerOne')?.value || '';
+      const playerTwo = $('h2hPlayerTwo')?.value || '';
+      const allNames = allPlayerNames();
+      const players = h2hPlayerOptions();
+
+      if ($('h2hPlayerOne')) {
+        $('h2hPlayerOne').innerHTML = '<option value="">Select player</option>' + players;
+        if (allNames.includes(playerOne)) $('h2hPlayerOne').value = playerOne;
+      }
+
+      if ($('h2hPlayerTwo')) {
+        $('h2hPlayerTwo').innerHTML = '<option value="">Select player</option>' + players;
+        if (allNames.includes(playerTwo)) $('h2hPlayerTwo').value = playerTwo;
+      }
+
+      rebuildH2HYearOptions('One');
+      rebuildH2HYearOptions('Two');
+    }
+
+    function rebuildH2HYearOptions(side) {
+      const player = $(`h2hPlayer${side}`)?.value || '';
+      const yearSelect = $(`h2hYear${side}`);
+      if (!yearSelect) return;
+
+      const previousYear = yearSelect.value;
+      const years = h2hYearsForPlayer(player);
+
+      yearSelect.innerHTML = years.length
+        ? years.map(y => `<option value="${escapeAttr(y)}">${escapeHtml(y)}</option>`).join('')
+        : '<option value="">Select year</option>';
+
+      if (years.includes(previousYear)) yearSelect.value = previousYear;
+      else if (years.length) yearSelect.value = years[0];
+    }
+
+    function comparisonStatRow(label, value, percentile, main = false) {
+      return `
+        <div class="comparison-stat">
+          <div class="comparison-stat-label">${escapeHtml(label)}</div>
+          <div class="comparison-stat-value-wrap">
+            <div class="comparison-stat-value ${main ? 'main' : ''}">${escapeHtml(value)}</div>
+            ${percentile ? `<div class="comparison-percentile">${escapeHtml(percentile)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderComparisonPanel(row) {
+      if (!row) {
+        return `
+          <div class="comparison-player-panel">
+            <div class="comparison-player-head">
+              <div class="comparison-player-name">Select Player</div>
+              <div class="comparison-player-meta">Year • Position • Team</div>
+            </div>
+            <div class="comparison-empty">No player season selected</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="comparison-player-panel">
+          <div class="comparison-player-head">
+            <div class="comparison-player-name">${escapeHtml(row.player)}</div>
+            <div class="comparison-player-meta">${escapeHtml(row.year)} • ${escapeHtml(row.position)} • ${escapeHtml(row.team || 'Team —')}</div>
+          </div>
+          <div class="comparison-stat-list">
+            ${comparisonStatRow('Games Played', whole(row.gp), '')}
+            ${comparisonStatRow('Magpie Score', fmt(row.score), percentileText(row, 'score'), true)}
+            ${comparisonStatRow('Hits', whole(row.hits), percentileText(row, 'hits'))}
+            ${comparisonStatRow('Blocked Shots', whole(row.blocked), percentileText(row, 'blocked'))}
+            ${comparisonStatRow('Takeaways', whole(row.takeaways), percentileText(row, 'takeaways'))}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHeadToHeadCard() {
+      if (!$('headToHeadBody')) return;
+
+      const p1 = $('h2hPlayerOne')?.value || '';
+      const y1 = $('h2hYearOne')?.value || '';
+      const p2 = $('h2hPlayerTwo')?.value || '';
+      const y2 = $('h2hYearTwo')?.value || '';
+
+      const rowOne = p1 && y1 ? rowForPlayerYear(p1, y1) : null;
+      const rowTwo = p2 && y2 ? rowForPlayerYear(p2, y2) : null;
+
+      if (rowOne && rowTwo) {
+        $('headToHeadSubtitle').textContent = `${rowOne.player} ${rowOne.year} vs ${rowTwo.player} ${rowTwo.year}`;
+      } else {
+        $('headToHeadSubtitle').textContent = 'Select two player seasons to compare directly';
+      }
+
+      $('headToHeadBody').innerHTML = `
+        <div class="head-to-head-grid">
+          ${renderComparisonPanel(rowOne)}
+          <div class="comparison-center"><div class="comparison-vs">VS</div></div>
+          ${renderComparisonPanel(rowTwo)}
+        </div>
+      `;
     }
 
     function renderTimelineCard() {
@@ -2207,6 +2610,8 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     }
 
@@ -2340,11 +2745,13 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     }
 
     function setLogo(dataUrl) {
-      for (const target of [$('heroLogo'), $('cardLogo'), $('timelineLogo'), $('rankingLogo')]) {
+      for (const target of [$('heroLogo'), $('cardLogo'), $('timelineLogo'), $('rankingLogo'), $('headToHeadLogo')]) {
         if (!target) continue;
         target.innerHTML = dataUrl ? `<img alt="Magpie logo" src="${dataUrl}">` : '<span>MP</span>';
       }
@@ -2379,6 +2786,10 @@
         width = 1200;
         const currentHeight = Math.ceil(card.getBoundingClientRect().height || card.offsetHeight || 900);
         height = Math.max(500, currentHeight);
+      } else if (cardId === 'headToHeadCard') {
+        width = 1200;
+        const currentHeight = Math.ceil(card.getBoundingClientRect().height || card.offsetHeight || 760);
+        height = Math.max(760, currentHeight);
       }
 
       const html = `<style>${document.querySelector('style').textContent}</style><div style="width:${width}px;height:${height}px;background:#050708;"><div style="width:${width}px;height:${height}px;">${clone.outerHTML}</div></div>`;
@@ -2418,6 +2829,8 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     }
 
@@ -2431,6 +2844,8 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     });
     $('exportBtn').addEventListener('click', exportCSV);
@@ -2560,12 +2975,53 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     }));
 
     ['timelinePlayerOne','timelinePlayerTwo','timelineMetric','timelineAverageBasis'].forEach(id => {
       $(id).addEventListener('change', renderTimelineCard);
       $(id).addEventListener('input', renderTimelineCard);
+    });
+
+    ['h2hPlayerOne','h2hYearOne','h2hPlayerTwo','h2hYearTwo'].forEach(id => {
+      $(id).addEventListener('change', () => {
+        if (id === 'h2hPlayerOne') rebuildH2HYearOptions('One');
+        if (id === 'h2hPlayerTwo') rebuildH2HYearOptions('Two');
+        renderHeadToHeadCard();
+      });
+      $(id).addEventListener('input', () => {
+        if (id === 'h2hPlayerOne') rebuildH2HYearOptions('One');
+        if (id === 'h2hPlayerTwo') rebuildH2HYearOptions('Two');
+        renderHeadToHeadCard();
+      });
+    });
+
+    $('useSelectedH2HOneBtn').addEventListener('click', () => {
+      const selected = selectedAggregate();
+      if (!selected) return alert('Select a player row first.');
+      $('h2hPlayerOne').value = selected.player;
+      rebuildH2HYearOptions('One');
+      $('h2hYearOne').value = selected.year;
+      renderHeadToHeadCard();
+    });
+
+    $('useSelectedH2HTwoBtn').addEventListener('click', () => {
+      const selected = selectedAggregate();
+      if (!selected) return alert('Select a player row first.');
+      $('h2hPlayerTwo').value = selected.player;
+      rebuildH2HYearOptions('Two');
+      $('h2hYearTwo').value = selected.year;
+      renderHeadToHeadCard();
+    });
+
+    $('downloadH2HCardBtn').addEventListener('click', () => {
+      const p1 = $('h2hPlayerOne').value || 'player-one';
+      const y1 = $('h2hYearOne').value || 'year-one';
+      const p2 = $('h2hPlayerTwo').value || 'player-two';
+      const y2 = $('h2hYearTwo').value || 'year-two';
+      downloadCardPNG('headToHeadCard', `${safeFileName(p1 + '-' + y1 + '-vs-' + p2 + '-' + y2)}-comparison`);
     });
 
     $('useSelectedTimelineBtn').addEventListener('click', () => {
@@ -2656,6 +3112,8 @@
       renderTable();
       renderPlayerCard();
       renderTimelineCard();
+      rebuildH2HControls();
+      renderHeadToHeadCard();
       renderRankingCard();
     }
 
