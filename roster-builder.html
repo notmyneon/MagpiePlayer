@@ -522,14 +522,54 @@
       min-height: 150px !important;
     }
 
+
+    .toi-panel {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(0,213,199,.22);
+    }
+    .toi-panel-title {
+      margin-bottom: 10px;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .86rem;
+      font-weight: 1000;
+    }
+    .toi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .range-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 6px;
+      align-items: center;
+    }
+    .range-row span {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: .7rem;
+      font-weight: 900;
+    }
+    .range-row input {
+      padding: 8px 9px;
+      text-align: center;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
       .top-controls, .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
       .wrap { width: min(100vw - 22px, 1440px); padding-top: 14px; }
-      .top-controls, .summary-grid, .stat-grid { grid-template-columns: 1fr; }
+      .top-controls, .summary-grid, .stat-grid, .toi-grid { grid-template-columns: 1fr; }
       .lineup-line, .lineup-line.defence { grid-template-columns: 1fr; }
       .line-label { align-self: start; }
       .card-logo, .brand-logo { width: 58px; height: 58px; flex-basis: 58px; }
@@ -562,7 +602,14 @@
           <label for="teamFilter">Optional Team Filter</label>
           <select id="teamFilter"><option value="">All Teams</option></select>
         </div>
-        <div class="mini-note" style="align-self:end;">Card title is fixed for screenshot consistency.</div>
+        <div>
+          <label for="sortOrder">Player Sort Order</label>
+          <select id="sortOrder">
+            <option value="toi">Minutes Played</option>
+            <option value="score">Magpie Score</option>
+            <option value="alpha">Alphabetical</option>
+          </select>
+        </div>
         <div style="align-self:end;">
           <button id="downloadRosterBtn" type="button">Download Roster PNG</button>
         </div>
@@ -571,7 +618,42 @@
         <button class="secondary" id="autoFillBtn" type="button">Auto Fill Best Eligible</button>
         <button class="secondary" id="clearRosterBtn" type="button">Clear Roster</button>
         <button class="secondary" id="reloadDataBtn" type="button">Reload Hosted Data</button>
-        <div class="mini-note" style="align-self:center;">The card is now the lineup display. Use the dropdown panel to build it.</div>
+        <button class="secondary" id="resetToiBtn" type="button">Reset TOI Bands</button>
+      </div>
+
+      <div class="toi-panel">
+        <div class="toi-panel-title">Adjust TOI Eligibility Bands</div>
+        <div class="toi-grid">
+          <div>
+            <label>Line 1 Forwards</label>
+            <div class="range-row"><input id="toi_f1_min" type="number" step="0.1" value="18"><span>to</span><input id="toi_f1_max" type="text" value="∞"></div>
+          </div>
+          <div>
+            <label>Line 2 Forwards</label>
+            <div class="range-row"><input id="toi_f2_min" type="number" step="0.1" value="15"><span>to</span><input id="toi_f2_max" type="number" step="0.1" value="18"></div>
+          </div>
+          <div>
+            <label>Line 3 Forwards</label>
+            <div class="range-row"><input id="toi_f3_min" type="number" step="0.1" value="12"><span>to</span><input id="toi_f3_max" type="number" step="0.1" value="15"></div>
+          </div>
+          <div>
+            <label>Line 4 Forwards</label>
+            <div class="range-row"><input id="toi_f4_min" type="number" step="0.1" value="1"><span>to</span><input id="toi_f4_max" type="number" step="0.1" value="12"></div>
+          </div>
+          <div>
+            <label>Top Defence Pair</label>
+            <div class="range-row"><input id="toi_d1_min" type="number" step="0.1" value="22"><span>to</span><input id="toi_d1_max" type="text" value="∞"></div>
+          </div>
+          <div>
+            <label>Middle Defence Pair</label>
+            <div class="range-row"><input id="toi_d2_min" type="number" step="0.1" value="17"><span>to</span><input id="toi_d2_max" type="number" step="0.1" value="22"></div>
+          </div>
+          <div>
+            <label>Bottom Defence Pair</label>
+            <div class="range-row"><input id="toi_d3_min" type="number" step="0.1" value="0"><span>to</span><input id="toi_d3_max" type="number" step="0.1" value="17"></div>
+          </div>
+        </div>
+        <div class="mini-note">Use ∞ or leave the max box blank for no upper limit. Changing a band keeps valid selected players and clears players who no longer fit.</div>
       </div>
       <div class="status-box" id="statusBox"></div>
     </section>
@@ -840,28 +922,29 @@
     }
 
     const rosterSlots = [
-      { id:'f1a', role:'L1 F1', title:'Line 1', position:'Forward', band:'18+ avg TOI', min:18, max:Infinity },
-      { id:'f1b', role:'L1 F2', title:'Line 1', position:'Forward', band:'18+ avg TOI', min:18, max:Infinity },
-      { id:'f1c', role:'L1 F3', title:'Line 1', position:'Forward', band:'18+ avg TOI', min:18, max:Infinity },
-      { id:'f2a', role:'L2 F1', title:'Line 2', position:'Forward', band:'15–18 avg TOI', min:15, max:18 },
-      { id:'f2b', role:'L2 F2', title:'Line 2', position:'Forward', band:'15–18 avg TOI', min:15, max:18 },
-      { id:'f2c', role:'L2 F3', title:'Line 2', position:'Forward', band:'15–18 avg TOI', min:15, max:18 },
-      { id:'f3a', role:'L3 F1', title:'Line 3', position:'Forward', band:'12–15 avg TOI', min:12, max:15 },
-      { id:'f3b', role:'L3 F2', title:'Line 3', position:'Forward', band:'12–15 avg TOI', min:12, max:15 },
-      { id:'f3c', role:'L3 F3', title:'Line 3', position:'Forward', band:'12–15 avg TOI', min:12, max:15 },
-      { id:'f4a', role:'L4 F1', title:'Line 4', position:'Forward', band:'1–12 avg TOI', min:1, max:12 },
-      { id:'f4b', role:'L4 F2', title:'Line 4', position:'Forward', band:'1–12 avg TOI', min:1, max:12 },
-      { id:'f4c', role:'L4 F3', title:'Line 4', position:'Forward', band:'1–12 avg TOI', min:1, max:12 },
-      { id:'d1a', role:'P1 D1', title:'Pair 1', position:'Defence', band:'22+ avg TOI', min:22, max:Infinity },
-      { id:'d1b', role:'P1 D2', title:'Pair 1', position:'Defence', band:'22+ avg TOI', min:22, max:Infinity },
-      { id:'d2a', role:'P2 D1', title:'Pair 2', position:'Defence', band:'17–22 avg TOI', min:17, max:22 },
-      { id:'d2b', role:'P2 D2', title:'Pair 2', position:'Defence', band:'17–22 avg TOI', min:17, max:22 },
-      { id:'d3a', role:'P3 D1', title:'Pair 3', position:'Defence', band:'Under 17 avg TOI', min:0, max:17 },
-      { id:'d3b', role:'P3 D2', title:'Pair 3', position:'Defence', band:'Under 17 avg TOI', min:0, max:17 }
+      { id:'f1a', role:'L1 F1', title:'Line 1', position:'Forward', band:'18+ avg TOI', bandKey:'f1' },
+      { id:'f1b', role:'L1 F2', title:'Line 1', position:'Forward', band:'18+ avg TOI', bandKey:'f1' },
+      { id:'f1c', role:'L1 F3', title:'Line 1', position:'Forward', band:'18+ avg TOI', bandKey:'f1' },
+      { id:'f2a', role:'L2 F1', title:'Line 2', position:'Forward', band:'15–18 avg TOI', bandKey:'f2' },
+      { id:'f2b', role:'L2 F2', title:'Line 2', position:'Forward', band:'15–18 avg TOI', bandKey:'f2' },
+      { id:'f2c', role:'L2 F3', title:'Line 2', position:'Forward', band:'15–18 avg TOI', bandKey:'f2' },
+      { id:'f3a', role:'L3 F1', title:'Line 3', position:'Forward', band:'12–15 avg TOI', bandKey:'f3' },
+      { id:'f3b', role:'L3 F2', title:'Line 3', position:'Forward', band:'12–15 avg TOI', bandKey:'f3' },
+      { id:'f3c', role:'L3 F3', title:'Line 3', position:'Forward', band:'12–15 avg TOI', bandKey:'f3' },
+      { id:'f4a', role:'L4 F1', title:'Line 4', position:'Forward', band:'1–12 avg TOI', bandKey:'f4' },
+      { id:'f4b', role:'L4 F2', title:'Line 4', position:'Forward', band:'1–12 avg TOI', bandKey:'f4' },
+      { id:'f4c', role:'L4 F3', title:'Line 4', position:'Forward', band:'1–12 avg TOI', bandKey:'f4' },
+      { id:'d1a', role:'P1 D1', title:'Pair 1', position:'Defence', band:'22+ avg TOI', bandKey:'d1' },
+      { id:'d1b', role:'P1 D2', title:'Pair 1', position:'Defence', band:'22+ avg TOI', bandKey:'d1' },
+      { id:'d2a', role:'P2 D1', title:'Pair 2', position:'Defence', band:'17–22 avg TOI', bandKey:'d2' },
+      { id:'d2b', role:'P2 D2', title:'Pair 2', position:'Defence', band:'17–22 avg TOI', bandKey:'d2' },
+      { id:'d3a', role:'P3 D1', title:'Pair 3', position:'Defence', band:'Under 17 avg TOI', bandKey:'d3' },
+      { id:'d3b', role:'P3 D2', title:'Pair 3', position:'Defence', band:'Under 17 avg TOI', bandKey:'d3' }
     ];
 
     function eligible(row, slot) {
-      return row.position === slot.position && row.avgtoi >= slot.min && row.avgtoi < slot.max;
+      const band = getToiBand(slot.bandKey);
+      return row.position === slot.position && row.avgtoi >= band.min && row.avgtoi < band.max;
     }
 
     function activeRows() {
@@ -876,13 +959,55 @@
       return new Set(Object.values(selected).filter(Boolean));
     }
 
+    function readRangeValue(id, fallback, isMax = false) {
+      const raw = clean($(id)?.value);
+      if (isMax && (!raw || raw === '∞' || raw.toLowerCase() === 'inf' || raw.toLowerCase() === 'infinity')) return Infinity;
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function getToiBand(key) {
+      return {
+        f1: { min: readRangeValue('toi_f1_min', 18), max: readRangeValue('toi_f1_max', Infinity, true), label: 'Line 1' },
+        f2: { min: readRangeValue('toi_f2_min', 15), max: readRangeValue('toi_f2_max', 18, true), label: 'Line 2' },
+        f3: { min: readRangeValue('toi_f3_min', 12), max: readRangeValue('toi_f3_max', 15, true), label: 'Line 3' },
+        f4: { min: readRangeValue('toi_f4_min', 1), max: readRangeValue('toi_f4_max', 12, true), label: 'Line 4' },
+        d1: { min: readRangeValue('toi_d1_min', 22), max: readRangeValue('toi_d1_max', Infinity, true), label: 'Pair 1' },
+        d2: { min: readRangeValue('toi_d2_min', 17), max: readRangeValue('toi_d2_max', 22, true), label: 'Pair 2' },
+        d3: { min: readRangeValue('toi_d3_min', 0), max: readRangeValue('toi_d3_max', 17, true), label: 'Pair 3' }
+      }[key] || { min: 0, max: Infinity, label: '' };
+    }
+
+    function formatBand(slot) {
+      const band = getToiBand(slot.bandKey);
+      const min = Number.isFinite(band.min) ? fmt(band.min, 1).replace(/\.0$/, '') : '0';
+      const max = Number.isFinite(band.max) ? fmt(band.max, 1).replace(/\.0$/, '') : '∞';
+      if (!Number.isFinite(band.max)) return `${min}+ avg TOI`;
+      if (band.min <= 0) return `Under ${max} avg TOI`;
+      return `${min}–${max} avg TOI`;
+    }
+
+    function validateSelectedPlayers() {
+      for (const slot of rosterSlots) {
+        const row = aggregateRecords().find(r => r.key === selected[slot.id]);
+        if (row && !eligible(row, slot)) selected[slot.id] = '';
+      }
+    }
+
+    function comparePlayersForDropdown(a, b) {
+      const order = $('sortOrder')?.value || 'toi';
+      if (order === 'score') return b.score - a.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player);
+      if (order === 'alpha') return a.player.localeCompare(b.player) || b.avgtoi - a.avgtoi || b.score - a.score;
+      return b.avgtoi - a.avgtoi || b.score - a.score || a.player.localeCompare(b.player);
+    }
+
     function slotOptions(slot) {
       const current = selected[slot.id] || '';
       const used = selectedKeys();
       return activeRows()
         .filter(row => eligible(row, slot))
         .filter(row => row.key === current || !used.has(row.key))
-        .sort((a,b) => b.avgtoi - a.avgtoi || b.score - a.score || a.player.localeCompare(b.player));
+        .sort(comparePlayersForDropdown);
     }
 
     function rebuildControls() {
@@ -916,7 +1041,7 @@
           <div class="selector-group">
             <div class="selector-group-head">
               <div class="selector-title">${escapeHtml(first.title)}</div>
-              <div class="selector-band">${escapeHtml(first.band)}</div>
+              <div class="selector-band">${escapeHtml(formatBand(first))}</div>
             </div>
             ${group.map(slot => renderSelectorSlot(slot)).join('')}
           </div>
@@ -989,6 +1114,7 @@
 
     function renderBuilder() {
       rebuildControls();
+      validateSelectedPlayers();
       renderSelectionPanel();
       renderCard();
     }
@@ -1110,11 +1236,27 @@
     }
 
     $('yearSelect').addEventListener('change', () => { selected = {}; renderBuilder(); });
+    $('sortOrder').addEventListener('change', renderBuilder);
     $('teamFilter').addEventListener('change', () => { selected = {}; renderBuilder(); });
     $('autoFillBtn').addEventListener('click', autoFill);
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
+    const toiInputIds = ['toi_f1_min','toi_f1_max','toi_f2_min','toi_f2_max','toi_f3_min','toi_f3_max','toi_f4_min','toi_f4_max','toi_d1_min','toi_d1_max','toi_d2_min','toi_d2_max','toi_d3_min','toi_d3_max'];
+    toiInputIds.forEach(id => $(id).addEventListener('input', renderBuilder));
+    $('resetToiBtn').addEventListener('click', () => {
+      const defaults = {
+        toi_f1_min:'18', toi_f1_max:'∞',
+        toi_f2_min:'15', toi_f2_max:'18',
+        toi_f3_min:'12', toi_f3_max:'15',
+        toi_f4_min:'1', toi_f4_max:'12',
+        toi_d1_min:'22', toi_d1_max:'∞',
+        toi_d2_min:'17', toi_d2_max:'22',
+        toi_d3_min:'0', toi_d3_max:'17'
+      };
+      Object.entries(defaults).forEach(([id, value]) => { $(id).value = value; });
+      renderBuilder();
+    });
 
     setLogo(localStorage.getItem(LOGO_KEY));
     loadHostedData();
