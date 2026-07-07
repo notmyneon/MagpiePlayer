@@ -469,6 +469,41 @@
       display: none;
     }
 
+
+    .card-title .accent { color: var(--teal); }
+    .card-subtitle { display: none !important; }
+
+    .lineup-line {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    .lineup-line.defence {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .line-label {
+      display: none !important;
+    }
+    .player-pill {
+      padding: 9px 10px !important;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .player-name {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: initial !important;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.05 !important;
+      min-height: 2.1em;
+    }
+    .player-meta {
+      margin-top: 5px !important;
+      font-size: .64rem !important;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
@@ -509,10 +544,7 @@
           <label for="teamFilter">Optional Team Filter</label>
           <select id="teamFilter"><option value="">All Teams</option></select>
         </div>
-        <div>
-          <label for="rosterTitle">Roster Card Title</label>
-          <input id="rosterTitle" value="Roster Magpie Score" />
-        </div>
+        <div class="mini-note" style="align-self:end;">Card title is fixed for screenshot consistency.</div>
         <div style="align-self:end;">
           <button id="downloadRosterBtn" type="button">Download Roster PNG</button>
         </div>
@@ -540,8 +572,8 @@
           <div class="roster-card-top">
             <div class="card-logo" id="cardLogo"><span>MP</span></div>
             <div>
-              <div class="card-title" id="cardTitle">Roster Magpie Score</div>
-              <div class="card-subtitle" id="cardSubtitle">Select a year and build an 18-skater roster</div>
+              <div class="card-title" id="cardTitle"><span class="accent">Magpie Score</span> <span>Roster Builder</span></div>
+              <div class="card-subtitle" id="cardSubtitle"></div>
             </div>
           </div>
 
@@ -564,11 +596,11 @@
 
           <div class="lineup-card-grid">
             <div class="lineup-section">
-              <div class="lineup-section-title"><span>Forward Lines</span><span>12 Skaters</span></div>
+              <div class="lineup-section-title"><span>Forwards</span></div>
               <div id="cardForwardLines"></div>
             </div>
             <div class="lineup-section">
-              <div class="lineup-section-title"><span>Defence Pairs</span><span>6 Skaters</span></div>
+              <div class="lineup-section-title"><span>Defence</span></div>
               <div id="cardDefencePairs"></div>
             </div>
           </div>
@@ -953,7 +985,6 @@
         const first = group[0];
         return `
           <div class="lineup-line ${position === 'Defence' ? 'defence' : ''}">
-            <div class="line-label">${escapeHtml(first.title)}</div>
             ${group.map(slot => renderPlayerPill(slot)).join('')}
           </div>
         `;
@@ -980,12 +1011,11 @@
 
     function renderCard() {
       const totals = rosterTotals();
-      const title = clean($('rosterTitle').value) || 'Roster Magpie Score';
       const year = $('yearSelect').value || 'Year';
       const team = $('teamFilter').value || 'Custom Roster';
 
-      $('cardTitle').textContent = title;
-      $('cardSubtitle').textContent = `${team} • ${year}`;
+      $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
+      $('cardSubtitle').textContent = '';
       $('cardScore').textContent = fmt(totals.score);
       $('cardScoreNote').textContent = `${totals.count} of 18 skaters selected`;
       $('selectedCount').textContent = `${totals.count}/18`;
@@ -1051,7 +1081,7 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img,0,0);
         const a = document.createElement('a');
-        a.download = `${safeFileName($('rosterTitle').value || 'roster-magpie-score')}.png`;
+        a.download = 'magpie-score-roster-builder.png';
         a.href = canvas.toDataURL('image/png');
         document.body.appendChild(a);
         a.click();
@@ -1063,7 +1093,6 @@
 
     $('yearSelect').addEventListener('change', () => { selected = {}; renderBuilder(); });
     $('teamFilter').addEventListener('change', () => { selected = {}; renderBuilder(); });
-    $('rosterTitle').addEventListener('input', renderCard);
     $('autoFillBtn').addEventListener('click', autoFill);
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
