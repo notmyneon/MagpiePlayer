@@ -504,6 +504,24 @@
       font-size: .64rem !important;
     }
 
+
+    /* Roster builder title and compact score-note cleanup */
+    .roster-card .card-title {
+      font-size: clamp(1.8rem, 3.45vw, 3.1rem) !important;
+      line-height: .9 !important;
+      white-space: nowrap !important;
+      letter-spacing: -.07em !important;
+    }
+    .roster-card-top {
+      align-items: center !important;
+    }
+    .score-note {
+      display: none !important;
+    }
+    .score-panel {
+      min-height: 150px !important;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
@@ -864,7 +882,7 @@
       return activeRows()
         .filter(row => eligible(row, slot))
         .filter(row => row.key === current || !used.has(row.key))
-        .sort((a,b) => b.score - a.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player));
+        .sort((a,b) => b.avgtoi - a.avgtoi || b.score - a.score || a.player.localeCompare(b.player));
     }
 
     function rebuildControls() {
@@ -1017,7 +1035,7 @@
       $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
       $('cardSubtitle').textContent = '';
       $('cardScore').textContent = fmt(totals.score);
-      $('cardScoreNote').textContent = `${totals.count} of 18 skaters selected`;
+      $('cardScoreNote').textContent = '';
       $('selectedCount').textContent = `${totals.count}/18`;
       $('summaryScore').textContent = fmt(totals.score);
       $('summaryHits').textContent = fmt(totals.hits);
