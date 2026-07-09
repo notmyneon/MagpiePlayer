@@ -653,7 +653,7 @@
             <div class="range-row"><input id="toi_d3_min" type="number" step="0.1" value="0"><span>to</span><input id="toi_d3_max" type="number" step="0.1" value="17"></div>
           </div>
         </div>
-        <div class="mini-note">Use ∞ or leave the max box blank for no upper limit. Changing a band keeps valid selected players and clears players who no longer fit. The score is line-weighted, so moving a player to a different role changes the calculation.</div>
+        <div class="mini-note">Use ∞ or leave the max box blank for no upper limit. Changing a band keeps valid selected players and clears players who no longer fit. The score is line-weighted, then normalized to a full 300 skater-minute game.</div>
       </div>
       <div class="status-box" id="statusBox"></div>
     </section>
@@ -997,6 +997,12 @@
       return `${fmt(roleMinutes(slot), 1).replace(/\.0$/, '')} role TOI`;
     }
 
+    function fullGameSkaterMinutesScale(selectedSlotRows) {
+      const selectedAssignedMinutes = selectedSlotRows.reduce((sum, { slot }) => sum + roleMinutes(slot), 0);
+      const targetSkaterMinutes = 300 * (selectedSlotRows.length / 18);
+      return selectedAssignedMinutes > 0 ? targetSkaterMinutes / selectedAssignedMinutes : 1;
+    }
+
     function validateSelectedPlayers() {
       for (const slot of rosterSlots) {
         const row = aggregateRecords().find(r => r.key === selected[slot.id]);
@@ -1090,10 +1096,13 @@
       return rosterSlots.map(slot => ({ slot, row: rowForSlot(slot) })).filter(x => x.row);
     }
 
-    function weightedPerGame(row, slot) {
+    function weightedPerGame(row, slot, fullGameScale = 1) {
       const gp = row.gp || 1;
       const actualTOI = row.avgtoi || 1;
-      const assignedTOI = roleMinutes(slot);
+
+      // Role TOI makes placement matter.
+      // Full-game scale keeps the finished 18-skater roster normalized to a full 300 skater-minute game.
+      const assignedTOI = roleMinutes(slot) * fullGameScale;
       const scale = assignedTOI / actualTOI;
 
       return {
@@ -1109,6 +1118,8 @@
 
     function rosterTotals() {
       const rows = selectedRows();
+      const fullGameScale = fullGameSkaterMinutesScale(rows);
+
       const totals = {
         count: rows.length,
         hits: 0,
@@ -1119,11 +1130,12 @@
         onIceSA: 0,
         ga: 0,
         shotsRate: 0,
-        assignedTOI: 0
+        assignedTOI: 0,
+        fullGameScale
       };
 
       rows.forEach(({ slot, row }) => {
-        const pg = weightedPerGame(row, slot);
+        const pg = weightedPerGame(row, slot, fullGameScale);
         totals.hits += pg.hits;
         totals.blocked += pg.blocked;
         totals.takeaways += pg.takeaways;
@@ -1133,6 +1145,7 @@
         totals.assignedTOI += pg.assignedTOI;
       });
 
+      // Estimate team-level defensive totals by correcting for five skaters on the ice.
       totals.ga = totals.onIceGA / 5;
       totals.shotsRate = totals.onIceSA / 5;
 
@@ -1191,7 +1204,7 @@
       $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
       $('cardSubtitle').textContent = '';
       $('cardScore').textContent = fmt(totals.score);
-      $('cardScoreNote').textContent = 'Line-weighted by assigned TOI';
+      $('cardScoreNote').textContent = 'Line-weighted and normalized to 300 skater-minutes';
       $('selectedCount').textContent = `${totals.count}/18`;
       $('summaryScore').textContent = fmt(totals.score);
       $('summaryHits').textContent = fmt(totals.hits);
