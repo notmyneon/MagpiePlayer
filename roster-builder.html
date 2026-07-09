@@ -516,7 +516,7 @@
       align-items: center !important;
     }
     .score-note {
-      display: none !important;
+      display: block !important;
     }
     .score-panel {
       min-height: 150px !important;
@@ -653,7 +653,7 @@
             <div class="range-row"><input id="toi_d3_min" type="number" step="0.1" value="0"><span>to</span><input id="toi_d3_max" type="number" step="0.1" value="17"></div>
           </div>
         </div>
-        <div class="mini-note">Use ∞ or leave the max box blank for no upper limit. Changing a band keeps valid selected players and clears players who no longer fit.</div>
+        <div class="mini-note">Use ∞ or leave the max box blank for no upper limit. Changing a band keeps valid selected players and clears players who no longer fit. The score is line-weighted, so moving a player to a different role changes the calculation.</div>
       </div>
       <div class="status-box" id="statusBox"></div>
     </section>
@@ -987,6 +987,16 @@
       return `${min}–${max} avg TOI`;
     }
 
+    function roleMinutes(slot) {
+      const band = getToiBand(slot.bandKey);
+      if (!Number.isFinite(band.max)) return band.min + 3;
+      return (band.min + band.max) / 2;
+    }
+
+    function roleMinutesLabel(slot) {
+      return `${fmt(roleMinutes(slot), 1).replace(/\.0$/, '')} role TOI`;
+    }
+
     function validateSelectedPlayers() {
       for (const slot of rosterSlots) {
         const row = aggregateRecords().find(r => r.key === selected[slot.id]);
@@ -1067,7 +1077,7 @@
             <option value="">Select player</option>
             ${options.map(row => `<option value="${escapeAttr(row.key)}" ${row.key === current ? 'selected' : ''}>${escapeHtml(row.player)} • ${fmt(row.avgtoi, 1)} TOI • ${fmt(row.score)}</option>`).join('')}
           </select>
-          <div class="slot-meta">${currentRow ? `${fmt(currentRow.avgtoi,1)} TOI • ${fmt(currentRow.score)} Magpie` : `${options.length} eligible`}</div>
+          <div class="slot-meta">${currentRow ? `${fmt(currentRow.avgtoi,1)} actual • ${roleMinutesLabel(slot)} • ${fmt(currentRow.score)} Magpie` : `${options.length} eligible • ${roleMinutesLabel(slot)}`}</div>
         </div>
       `;
     }
@@ -1080,32 +1090,52 @@
       return rosterSlots.map(slot => ({ slot, row: rowForSlot(slot) })).filter(x => x.row);
     }
 
-    function perGame(row) {
+    function weightedPerGame(row, slot) {
       const gp = row.gp || 1;
+      const actualTOI = row.avgtoi || 1;
+      const assignedTOI = roleMinutes(slot);
+      const scale = assignedTOI / actualTOI;
+
       return {
-        hits: row.hits / gp,
-        blocked: row.blocked / gp,
-        takeaways: row.takeaways / gp,
-        minors: row.minorPenalties / gp,
-        onIceGA: row.goalsAgainst / gp,
-        onIceSA: row.shotsAgainst / gp
+        assignedTOI,
+        hits: (row.hits / gp) * scale,
+        blocked: (row.blocked / gp) * scale,
+        takeaways: (row.takeaways / gp) * scale,
+        minors: (row.minorPenalties / gp) * scale,
+        onIceGA: (row.goalsAgainst / gp) * scale,
+        onIceSA: (row.shotsAgainst / gp) * scale
       };
     }
 
     function rosterTotals() {
       const rows = selectedRows();
-      const totals = { count: rows.length, hits:0, blocked:0, takeaways:0, minors:0, onIceGA:0, onIceSA:0, ga:0, shotsRate:0 };
-      rows.forEach(({ row }) => {
-        const pg = perGame(row);
+      const totals = {
+        count: rows.length,
+        hits: 0,
+        blocked: 0,
+        takeaways: 0,
+        minors: 0,
+        onIceGA: 0,
+        onIceSA: 0,
+        ga: 0,
+        shotsRate: 0,
+        assignedTOI: 0
+      };
+
+      rows.forEach(({ slot, row }) => {
+        const pg = weightedPerGame(row, slot);
         totals.hits += pg.hits;
         totals.blocked += pg.blocked;
         totals.takeaways += pg.takeaways;
         totals.minors += pg.minors;
         totals.onIceGA += pg.onIceGA;
         totals.onIceSA += pg.onIceSA;
+        totals.assignedTOI += pg.assignedTOI;
       });
+
       totals.ga = totals.onIceGA / 5;
       totals.shotsRate = totals.onIceSA / 5;
+
       const numerator = totals.hits + totals.blocked + totals.takeaways;
       const denominator = totals.shotsRate + totals.ga + totals.minors;
       totals.score = denominator > 0 ? (numerator / denominator) * 10 : 0;
@@ -1148,7 +1178,7 @@
       return `
         <div class="player-pill">
           <div class="player-name">${escapeHtml(row.player)}</div>
-          <div class="player-meta">${fmt(row.avgtoi,1)} TOI • ${fmt(row.score)}</div>
+          <div class="player-meta">${fmt(row.avgtoi,1)} actual • ${roleMinutesLabel(slot)} • ${fmt(row.score)}</div>
         </div>
       `;
     }
@@ -1161,7 +1191,7 @@
       $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
       $('cardSubtitle').textContent = '';
       $('cardScore').textContent = fmt(totals.score);
-      $('cardScoreNote').textContent = '';
+      $('cardScoreNote').textContent = 'Line-weighted by assigned TOI';
       $('selectedCount').textContent = `${totals.count}/18`;
       $('summaryScore').textContent = fmt(totals.score);
       $('summaryHits').textContent = fmt(totals.hits);
