@@ -471,7 +471,14 @@
 
 
     .card-title .accent { color: var(--teal); }
-    .card-subtitle { display: none !important; }
+    .card-subtitle {
+      display: block !important;
+      margin-top: 6px !important;
+      min-height: 0;
+    }
+    .card-subtitle:empty {
+      display: none !important;
+    }
 
     .lineup-line {
       grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -501,7 +508,9 @@
     }
     .player-meta {
       margin-top: 5px !important;
-      font-size: .64rem !important;
+      font-size: .72rem !important;
+      color: var(--teal) !important;
+      letter-spacing: .04em !important;
     }
 
 
@@ -632,6 +641,10 @@
             <option value="score">Magpie Score</option>
             <option value="alpha">Alphabetical</option>
           </select>
+        </div>
+<div>
+          <label for="rosterSubtitle">Roster Subtitle</label>
+          <input id="rosterSubtitle" placeholder="Optional subtitle" />
         </div>
         <div style="align-self:end;">
           <button id="downloadRosterBtn" type="button">Download Roster PNG</button>
@@ -1215,7 +1228,7 @@
       return `
         <div class="player-pill">
           <div class="player-name">${escapeHtml(row.player)}</div>
-          <div class="player-meta">${fmt(row.avgtoi,1)} actual • ${roleMinutesLabel(slot)} • ${fmt(row.score)}</div>
+          <div class="player-meta">Magpie Score ${fmt(row.score)}</div>
         </div>
       `;
     }
@@ -1224,9 +1237,10 @@
       const totals = rosterTotals();
       const year = $('yearSelect').value || 'Year';
       const team = $('teamFilter').value || 'Custom Roster';
+      const subtitle = clean($('rosterSubtitle')?.value);
 
       $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
-      $('cardSubtitle').textContent = '';
+      $('cardSubtitle').textContent = subtitle;
       $('cardScore').textContent = fmt(totals.score);
       $('cardScoreNote').textContent = 'Role TOI weighted and normalized to 300 skater-minutes';
       $('selectedCount').textContent = `${totals.count}/18`;
@@ -1305,6 +1319,7 @@
     $('yearSelect').addEventListener('change', () => { selected = {}; renderBuilder(); });
     $('sortOrder').addEventListener('change', renderBuilder);
     $('teamFilter').addEventListener('change', () => { selected = {}; renderBuilder(); });
+    $('rosterSubtitle').addEventListener('input', renderCard);
     $('autoFillBtn').addEventListener('click', autoFill);
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
