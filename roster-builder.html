@@ -508,9 +508,9 @@
     }
     .player-meta {
       margin-top: 6px !important;
-      font-size: .9rem !important;
+      font-size: .78rem !important;
       color: var(--teal) !important;
-      letter-spacing: -.02em !important;
+      letter-spacing: .02em !important;
       font-weight: 1000 !important;
     }
 
@@ -594,6 +594,22 @@
       background: rgba(0,213,199,.06);
     }
 
+
+    .gp-filter-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 74px;
+      gap: 8px;
+      align-items: center;
+    }
+    .gp-filter-wrap input[type="range"] {
+      padding: 0;
+      accent-color: var(--teal);
+    }
+    .gp-filter-wrap input[type="number"] {
+      text-align: center;
+      padding: 8px 9px;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
@@ -643,6 +659,13 @@
             <option value="alpha">Alphabetical</option>
           </select>
         </div>
+        <div>
+          <label for="minGpFilter">Minimum GP</label>
+          <div class="gp-filter-wrap">
+            <input id="minGpFilter" type="range" min="0" max="82" step="1" value="0" />
+            <input id="minGpNumber" type="number" min="0" max="82" step="1" value="0" />
+          </div>
+        </div>
 <div>
           <label for="rosterSubtitle">Roster Subtitle</label>
           <input id="rosterSubtitle" placeholder="Optional subtitle" />
@@ -653,6 +676,7 @@
       </div>
       <div class="top-controls">
         <button class="secondary" id="autoFillBtn" type="button">Auto Fill Best Eligible</button>
+        <button class="secondary" id="autoFillLowestBtn" type="button">Auto Fill Lowest Eligible</button>
         <button class="secondary" id="clearRosterBtn" type="button">Clear Roster</button>
         <button class="secondary" id="reloadDataBtn" type="button">Reload Hosted Data</button>
         <button class="secondary" id="resetToiBtn" type="button">Reset TOI Bands</button>
@@ -987,13 +1011,27 @@
     function activeRows() {
       const year = $('yearSelect').value;
       const team = $('teamFilter').value;
-      let rows = aggregateRecords().filter(r => r.year === year);
+      const minimumGP = minGP();
+      let rows = aggregateRecords().filter(r => r.year === year && r.gp >= minimumGP);
       if (team) rows = rows.filter(r => clean(r.team).split(',').map(t => clean(t)).includes(team));
       return rows;
     }
 
     function selectedKeys() {
       return new Set(Object.values(selected).filter(Boolean));
+    }
+
+    function minGP() {
+      return Math.max(0, num($('minGpFilter')?.value));
+    }
+
+    function syncMinGP(source = 'range') {
+      const range = $('minGpFilter');
+      const number = $('minGpNumber');
+      if (!range || !number) return;
+      const value = Math.max(0, Math.min(82, Math.round(num(source === 'number' ? number.value : range.value))));
+      range.value = value;
+      number.value = value;
     }
 
     function readRangeValue(id, fallback, isMax = false) {
@@ -1042,9 +1080,10 @@
     }
 
     function validateSelectedPlayers() {
+      const minimumGP = minGP();
       for (const slot of rosterSlots) {
         const row = aggregateRecords().find(r => r.key === selected[slot.id]);
-        if (row && !eligible(row, slot)) selected[slot.id] = '';
+        if (row && (!eligible(row, slot) || row.gp < minimumGP)) selected[slot.id] = '';
       }
     }
 
@@ -1229,7 +1268,7 @@
       return `
         <div class="player-pill">
           <div class="player-name">${escapeHtml(row.player)}</div>
-          <div class="player-meta">${fmt(row.score)}</div>
+          <div class="player-meta">${whole(row.gp)} GP • ${fmt(row.score)}</div>
         </div>
       `;
     }
@@ -1261,14 +1300,20 @@
       renderLineupSection('cardDefencePairs', 'Defence');
     }
 
-    function autoFill() {
+    function autoFill(mode = 'best') {
       selected = {};
       for (const slot of rosterSlots) {
         const used = selectedKeys();
-        const candidate = activeRows()
+        const candidates = activeRows()
           .filter(row => eligible(row, slot))
-          .filter(row => !used.has(row.key))
-          .sort((a,b) => b.score - a.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player))[0];
+          .filter(row => !used.has(row.key));
+
+        candidates.sort((a,b) => {
+          if (mode === 'lowest') return a.score - b.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player);
+          return b.score - a.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player);
+        });
+
+        const candidate = candidates[0];
         if (candidate) selected[slot.id] = candidate.key;
       }
       renderBuilder();
@@ -1319,9 +1364,12 @@
 
     $('yearSelect').addEventListener('change', () => { selected = {}; renderBuilder(); });
     $('sortOrder').addEventListener('change', renderBuilder);
+    $('minGpFilter').addEventListener('input', () => { syncMinGP('range'); renderBuilder(); });
+    $('minGpNumber').addEventListener('input', () => { syncMinGP('number'); renderBuilder(); });
     $('teamFilter').addEventListener('change', () => { selected = {}; renderBuilder(); });
     $('rosterSubtitle').addEventListener('input', renderCard);
-    $('autoFillBtn').addEventListener('click', autoFill);
+    $('autoFillBtn').addEventListener('click', () => autoFill('best'));
+    $('autoFillLowestBtn').addEventListener('click', () => autoFill('lowest'));
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
