@@ -507,10 +507,11 @@
       min-height: 2.1em;
     }
     .player-meta {
-      margin-top: 5px !important;
-      font-size: .72rem !important;
+      margin-top: 6px !important;
+      font-size: .9rem !important;
       color: var(--teal) !important;
-      letter-spacing: .04em !important;
+      letter-spacing: -.02em !important;
+      font-weight: 1000 !important;
     }
 
 
@@ -525,7 +526,7 @@
       align-items: center !important;
     }
     .score-note {
-      display: block !important;
+      display: none !important;
     }
     .score-panel {
       min-height: 150px !important;
@@ -1228,7 +1229,7 @@
       return `
         <div class="player-pill">
           <div class="player-name">${escapeHtml(row.player)}</div>
-          <div class="player-meta">Magpie Score ${fmt(row.score)}</div>
+          <div class="player-meta">${fmt(row.score)}</div>
         </div>
       `;
     }
@@ -1242,7 +1243,7 @@
       $('cardTitle').innerHTML = '<span class="accent">Magpie Score</span> <span>Roster Builder</span>';
       $('cardSubtitle').textContent = subtitle;
       $('cardScore').textContent = fmt(totals.score);
-      $('cardScoreNote').textContent = 'Role TOI weighted and normalized to 300 skater-minutes';
+      $('cardScoreNote').textContent = '';
       $('selectedCount').textContent = `${totals.count}/18`;
       $('summaryScore').textContent = fmt(totals.score);
       $('summaryHits').textContent = fmt(totals.hits);
