@@ -677,6 +677,7 @@
       <div class="top-controls">
         <button class="secondary" id="autoFillBtn" type="button">Auto Fill Best Eligible</button>
         <button class="secondary" id="autoFillLowestBtn" type="button">Auto Fill Lowest Eligible</button>
+        <button class="secondary" id="autoLoadTeamToiBtn" type="button">Auto Load Team by TOI</button>
         <button class="secondary" id="clearRosterBtn" type="button">Clear Roster</button>
         <button class="secondary" id="reloadDataBtn" type="button">Reload Hosted Data</button>
         <button class="secondary" id="resetToiBtn" type="button">Reset TOI Bands</button>
@@ -714,7 +715,7 @@
             <div class="range-row"><input id="toi_d3_min" type="number" step="0.1" value="0"><span>to</span><input id="toi_d3_max" type="number" step="0.1" value="17"></div><div class="role-row"><span>Role TOI</span><input id="role_d3" type="number" step="0.1" value="8.5"></div>
           </div>
         </div>
-        <div class="mini-note">Use the pool min/max to decide who appears in each dropdown. Use Role TOI to control the calculation weight. This lets you move players around without changing the role value.</div>
+        <div class="mini-note">Use the pool min/max to decide who appears in each dropdown. Use Role TOI to control the calculation weight. Auto Load Team by TOI ignores pool bands and places the selected team by average minutes played.</div>
       </div>
       <div class="status-box" id="statusBox"></div>
     </section>
@@ -780,6 +781,7 @@
     let records = [];
     let aggregateCache = null;
     let selected = {};
+    let rosterLoadMode = 'pool';
 
     const $ = id => document.getElementById(id);
     function clean(value) { return String(value ?? '').trim(); }
@@ -1017,6 +1019,19 @@
       return rows;
     }
 
+
+    function selectedTeamSeasonRows() {
+      const year = $('yearSelect').value;
+      const team = $('teamFilter').value;
+      const minimumGP = minGP();
+
+      if (!team) return [];
+
+      return aggregateRecords()
+        .filter(r => r.year === year && r.gp >= minimumGP)
+        .filter(r => clean(r.team).split(',').map(t => clean(t)).includes(team));
+    }
+
     function selectedKeys() {
       return new Set(Object.values(selected).filter(Boolean));
     }
@@ -1081,9 +1096,23 @@
 
     function validateSelectedPlayers() {
       const minimumGP = minGP();
+      const year = $('yearSelect').value;
+      const team = $('teamFilter').value;
+
       for (const slot of rosterSlots) {
         const row = aggregateRecords().find(r => r.key === selected[slot.id]);
-        if (row && (!eligible(row, slot) || row.gp < minimumGP)) selected[slot.id] = '';
+        if (!row) continue;
+
+        const wrongContext =
+          row.year !== year ||
+          row.gp < minimumGP ||
+          (team && !clean(row.team).split(',').map(t => clean(t)).includes(team));
+
+        if (rosterLoadMode === 'teamToi') {
+          if (wrongContext) selected[slot.id] = '';
+        } else {
+          if (wrongContext || !eligible(row, slot)) selected[slot.id] = '';
+        }
       }
     }
 
@@ -1301,6 +1330,7 @@
     }
 
     function autoFill(mode = 'best') {
+      rosterLoadMode = 'pool';
       selected = {};
       for (const slot of rosterSlots) {
         const used = selectedKeys();
@@ -1319,7 +1349,56 @@
       renderBuilder();
     }
 
+    function autoLoadTeamByTOI() {
+      const team = $('teamFilter').value;
+      const year = $('yearSelect').value;
+
+      if (!team) {
+        alert('Select a specific team first, then use Auto Load Team by TOI.');
+        return;
+      }
+
+      const rows = selectedTeamSeasonRows();
+
+      const forwards = rows
+        .filter(r => r.position === 'Forward')
+        .sort((a,b) => b.avgtoi - a.avgtoi || b.gp - a.gp || b.score - a.score || a.player.localeCompare(b.player))
+        .slice(0, 12);
+
+      const defence = rows
+        .filter(r => r.position === 'Defence')
+        .sort((a,b) => b.avgtoi - a.avgtoi || b.gp - a.gp || b.score - a.score || a.player.localeCompare(b.player))
+        .slice(0, 6);
+
+      selected = {};
+      rosterLoadMode = 'teamToi';
+
+      const forwardSlots = rosterSlots.filter(s => s.position === 'Forward');
+      const defenceSlots = rosterSlots.filter(s => s.position === 'Defence');
+
+      forwards.forEach((row, index) => {
+        if (forwardSlots[index]) selected[forwardSlots[index].id] = row.key;
+      });
+
+      defence.forEach((row, index) => {
+        if (defenceSlots[index]) selected[defenceSlots[index].id] = row.key;
+      });
+
+      renderBuilder();
+
+      const missing = [];
+      if (forwards.length < 12) missing.push(`${12 - forwards.length} forward${12 - forwards.length === 1 ? '' : 's'}`);
+      if (defence.length < 6) missing.push(`${6 - defence.length} defenceman${6 - defence.length === 1 ? '' : 'men'}`);
+
+      if (missing.length) {
+        showStatus(`Loaded ${team} ${year} by TOI, but the Minimum GP filter left the roster short. Missing ${missing.join(' and ')}.`, true);
+      } else {
+        showStatus(`Loaded ${team} ${year} by average TOI.`, true);
+      }
+    }
+
     function clearRoster() {
+      rosterLoadMode = 'pool';
       selected = {};
       renderBuilder();
     }
@@ -1362,14 +1441,15 @@
       img.src = url;
     }
 
-    $('yearSelect').addEventListener('change', () => { selected = {}; renderBuilder(); });
+    $('yearSelect').addEventListener('change', () => { rosterLoadMode = 'pool'; selected = {}; renderBuilder(); });
     $('sortOrder').addEventListener('change', renderBuilder);
     $('minGpFilter').addEventListener('input', () => { syncMinGP('range'); renderBuilder(); });
     $('minGpNumber').addEventListener('input', () => { syncMinGP('number'); renderBuilder(); });
-    $('teamFilter').addEventListener('change', () => { selected = {}; renderBuilder(); });
+    $('teamFilter').addEventListener('change', () => { rosterLoadMode = 'pool'; selected = {}; renderBuilder(); });
     $('rosterSubtitle').addEventListener('input', renderCard);
     $('autoFillBtn').addEventListener('click', () => autoFill('best'));
     $('autoFillLowestBtn').addEventListener('click', () => autoFill('lowest'));
+    $('autoLoadTeamToiBtn').addEventListener('click', autoLoadTeamByTOI);
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
