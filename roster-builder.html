@@ -610,15 +610,93 @@
       padding: 8px 9px;
     }
 
+
+    .pool-panel {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(0,213,199,.22);
+    }
+    .pool-panel-title {
+      margin-bottom: 10px;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .86rem;
+      font-weight: 1000;
+    }
+    .pool-controls {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) minmax(220px, 1.2fr) auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .pool-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .pool-list {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 42px;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .pool-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 280px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: rgba(0,213,199,.10);
+      border: 1px solid rgba(0,213,199,.24);
+      color: var(--white);
+      font-size: .78rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+    .pool-chip span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pool-chip button {
+      width: auto;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--white);
+      border-color: rgba(255,255,255,.14);
+      font-size: .72rem;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .pool-empty {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: .74rem;
+      font-weight: 900;
+      padding: 6px;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
       .top-controls, .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pool-controls, .pool-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .toi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
       .wrap { width: min(100vw - 22px, 1440px); padding-top: 14px; }
-      .top-controls, .summary-grid, .stat-grid, .toi-grid { grid-template-columns: 1fr; }
+      .top-controls, .summary-grid, .stat-grid, .toi-grid, .pool-controls, .pool-actions { grid-template-columns: 1fr; }
       .lineup-line, .lineup-line.defence { grid-template-columns: 1fr; }
       .line-label { align-self: start; }
       .card-logo, .brand-logo { width: 58px; height: 58px; flex-basis: 58px; }
@@ -681,6 +759,34 @@
         <button class="secondary" id="clearRosterBtn" type="button">Clear Roster</button>
         <button class="secondary" id="reloadDataBtn" type="button">Reload Hosted Data</button>
         <button class="secondary" id="resetToiBtn" type="button">Reset TOI Bands</button>
+      </div>
+
+      <div class="pool-panel">
+        <div class="pool-panel-title">Custom Player Pool</div>
+        <div class="pool-controls">
+          <div>
+            <label for="poolSearch">Search Pool Candidates</label>
+            <input id="poolSearch" placeholder="Search player name..." />
+          </div>
+          <div>
+            <label for="poolCandidateSelect">Player to Add</label>
+            <select id="poolCandidateSelect"><option value="">Select player</option></select>
+          </div>
+          <div style="align-self:end;">
+            <button class="secondary" id="addPoolPlayerBtn" type="button">Add Player</button>
+          </div>
+          <div style="align-self:end;">
+            <button class="secondary" id="addCurrentFilterPoolBtn" type="button">Add Current Filter</button>
+          </div>
+        </div>
+        <div class="pool-actions">
+          <button class="secondary" id="autoPoolBestBtn" type="button">Auto Pick Pool Best</button>
+          <button class="secondary" id="autoPoolLowestBtn" type="button">Auto Pick Pool Lowest</button>
+          <button class="secondary" id="autoPoolToiBtn" type="button">Auto Pick Pool TOI</button>
+          <button class="secondary" id="clearPoolBtn" type="button">Clear Pool</button>
+        </div>
+        <div class="pool-list" id="customPoolList"></div>
+        <div class="mini-note">The custom pool filters who can be auto-picked. Pool auto-pick ignores line pool bands, but still respects year, position, and Minimum GP.</div>
       </div>
 
       <div class="toi-panel">
@@ -782,6 +888,7 @@
     let aggregateCache = null;
     let selected = {};
     let rosterLoadMode = 'pool';
+    let customPool = [];
 
     const $ = id => document.getElementById(id);
     function clean(value) { return String(value ?? '').trim(); }
@@ -795,6 +902,7 @@
     function fmt(n, places = 2) { return Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: places, maximumFractionDigits: places }) : '0.00'; }
     function whole(n) { return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'; }
     function playerKey(value) { return clean(value).toLowerCase().replace(/\s+/g, ' '); }
+    function positionShort(position) { return position === 'Defence' ? 'D' : 'F'; }
 
     function parseTOI(value) {
       const raw = clean(value);
@@ -1108,7 +1216,7 @@
           row.gp < minimumGP ||
           (team && !clean(row.team).split(',').map(t => clean(t)).includes(team));
 
-        if (rosterLoadMode === 'teamToi') {
+        if (rosterLoadMode === 'teamToi' || rosterLoadMode === 'customPool') {
           if (wrongContext) selected[slot.id] = '';
         } else {
           if (wrongContext || !eligible(row, slot)) selected[slot.id] = '';
@@ -1148,6 +1256,143 @@
       if (teams.includes(currentTeam)) $('teamFilter').value = currentTeam;
     }
 
+    function poolKeys() {
+      return new Set(customPool);
+    }
+
+    function poolCandidateRows() {
+      const year = $('yearSelect').value;
+      const team = $('teamFilter').value;
+      const minimumGP = minGP();
+      const query = clean($('poolSearch')?.value).toLowerCase();
+
+      let rows = aggregateRecords().filter(r => r.year === year && r.gp >= minimumGP);
+      if (team) rows = rows.filter(r => clean(r.team).split(',').map(t => clean(t)).includes(team));
+      if (query) rows = rows.filter(r => r.player.toLowerCase().includes(query));
+
+      const pool = poolKeys();
+      return rows
+        .filter(r => !pool.has(r.key))
+        .sort(comparePlayersForDropdown)
+        .slice(0, 250);
+    }
+
+    function activePoolRows() {
+      const year = $('yearSelect').value;
+      const minimumGP = minGP();
+      const pool = poolKeys();
+
+      return aggregateRecords()
+        .filter(r => r.year === year && r.gp >= minimumGP && pool.has(r.key));
+    }
+
+    function addPlayerToPool(key) {
+      if (!key || customPool.includes(key)) return;
+      customPool.push(key);
+      renderCustomPoolPanel();
+    }
+
+    function removePlayerFromPool(key) {
+      customPool = customPool.filter(k => k !== key);
+      renderCustomPoolPanel();
+    }
+
+    function addCurrentFilterToPool() {
+      const rows = activeRows();
+      rows.forEach(row => {
+        if (!customPool.includes(row.key)) customPool.push(row.key);
+      });
+      renderCustomPoolPanel();
+      showStatus(`Added ${rows.length.toLocaleString()} current-filter player${rows.length === 1 ? '' : 's'} to the custom pool.`, true);
+    }
+
+    function renderCustomPoolPanel() {
+      const select = $('poolCandidateSelect');
+      const list = $('customPoolList');
+      if (!select || !list) return;
+
+      const previous = select.value;
+      const candidates = poolCandidateRows();
+
+      select.innerHTML = '<option value="">Select player</option>' + candidates.map(row =>
+        `<option value="${escapeAttr(row.key)}">${escapeHtml(row.player)} • ${escapeHtml(row.team || 'Team —')} • ${escapeHtml(positionShort(row.position))} • ${whole(row.gp)} GP • ${fmt(row.avgtoi,1)} TOI • ${fmt(row.score)}</option>`
+      ).join('');
+
+      if (candidates.some(row => row.key === previous)) select.value = previous;
+
+      const rows = activePoolRows().sort((a,b) =>
+        a.position.localeCompare(b.position) ||
+        b.avgtoi - a.avgtoi ||
+        a.player.localeCompare(b.player)
+      );
+
+      const totalPool = customPool.length;
+      if (!rows.length) {
+        list.innerHTML = `<div class="pool-empty">No active pool players for this year / Minimum GP filter. ${totalPool ? `${totalPool} saved in pool.` : 'Add players above.'}</div>`;
+        return;
+      }
+
+      list.innerHTML = rows.map(row => `
+        <div class="pool-chip" title="${escapeAttr(row.player)}">
+          <span>${escapeHtml(row.player)} • ${escapeHtml(positionShort(row.position))} • ${fmt(row.score)}</span>
+          <button type="button" data-remove-pool="${escapeAttr(row.key)}">Remove</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('[data-remove-pool]').forEach(button => {
+        button.addEventListener('click', () => removePlayerFromPool(button.dataset.removePool));
+      });
+    }
+
+    function sortForPoolMode(mode) {
+      return (a,b) => {
+        if (mode === 'lowest') return a.score - b.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player);
+        if (mode === 'toi') return b.avgtoi - a.avgtoi || b.score - a.score || a.player.localeCompare(b.player);
+        return b.score - a.score || b.avgtoi - a.avgtoi || a.player.localeCompare(b.player);
+      };
+    }
+
+    function autoPickFromPool(mode = 'best') {
+      const rows = activePoolRows();
+
+      const forwards = rows
+        .filter(r => r.position === 'Forward')
+        .sort(sortForPoolMode(mode))
+        .slice(0, 12);
+
+      const defence = rows
+        .filter(r => r.position === 'Defence')
+        .sort(sortForPoolMode(mode))
+        .slice(0, 6);
+
+      selected = {};
+      rosterLoadMode = 'customPool';
+
+      const forwardSlots = rosterSlots.filter(s => s.position === 'Forward');
+      const defenceSlots = rosterSlots.filter(s => s.position === 'Defence');
+
+      forwards.forEach((row, index) => {
+        if (forwardSlots[index]) selected[forwardSlots[index].id] = row.key;
+      });
+
+      defence.forEach((row, index) => {
+        if (defenceSlots[index]) selected[defenceSlots[index].id] = row.key;
+      });
+
+      renderBuilder();
+
+      const missing = [];
+      if (forwards.length < 12) missing.push(`${12 - forwards.length} forward${12 - forwards.length === 1 ? '' : 's'}`);
+      if (defence.length < 6) missing.push(`${6 - defence.length} defenceman${6 - defence.length === 1 ? '' : 'men'}`);
+
+      const label = mode === 'lowest' ? 'lowest Magpie Score' : mode === 'toi' ? 'average TOI' : 'best Magpie Score';
+      if (missing.length) {
+        showStatus(`Auto-picked from custom pool by ${label}, but the pool is short. Missing ${missing.join(' and ')}.`, true);
+      } else {
+        showStatus(`Auto-picked full roster from custom pool by ${label}.`, true);
+      }
+    }
+
     function renderSelectionPanel() {
       const groups = [];
       for (let i = 0; i < rosterSlots.length; ) {
@@ -1172,6 +1417,7 @@
 
       $('selectionPanel').querySelectorAll('select[data-slot]').forEach(select => {
         select.addEventListener('change', () => {
+          rosterLoadMode = 'pool';
           selected[select.dataset.slot] = select.value;
           renderBuilder();
         });
@@ -1264,6 +1510,7 @@
     function renderBuilder() {
       rebuildControls();
       validateSelectedPlayers();
+      renderCustomPoolPanel();
       renderSelectionPanel();
       renderCard();
     }
@@ -1453,6 +1700,16 @@
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
+    $('poolSearch').addEventListener('input', renderCustomPoolPanel);
+    $('addPoolPlayerBtn').addEventListener('click', () => addPlayerToPool($('poolCandidateSelect').value));
+    $('addCurrentFilterPoolBtn').addEventListener('click', addCurrentFilterToPool);
+    $('autoPoolBestBtn').addEventListener('click', () => autoPickFromPool('best'));
+    $('autoPoolLowestBtn').addEventListener('click', () => autoPickFromPool('lowest'));
+    $('autoPoolToiBtn').addEventListener('click', () => autoPickFromPool('toi'));
+    $('clearPoolBtn').addEventListener('click', () => {
+      customPool = [];
+      renderBuilder();
+    });
     const toiInputIds = ['toi_f1_min','toi_f1_max','toi_f2_min','toi_f2_max','toi_f3_min','toi_f3_max','toi_f4_min','toi_f4_max','toi_d1_min','toi_d1_max','toi_d2_min','toi_d2_max','toi_d3_min','toi_d3_max','role_f1','role_f2','role_f3','role_f4','role_d1','role_d2','role_d3'];
     toiInputIds.forEach(id => $(id).addEventListener('input', renderBuilder));
     $('resetToiBtn').addEventListener('click', () => {
