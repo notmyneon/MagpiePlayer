@@ -345,10 +345,7 @@
     .timeline-title { color: var(--white); font-size: clamp(1.3rem, 2.5vw, 2.35rem); line-height: .94; font-weight: 1000; letter-spacing: -.06em; text-transform: uppercase; white-space: normal; max-width: 100%; }
     .timeline-title .season { color: var(--teal); }
     .timeline-player-row { gap: 12px; }
-    .timeline-player-name { color: var(--white); font-size: clamp(1.2rem, 2.6vw, 2.45rem); line-height: .94; font-weight: 1000; letter-spacing: -.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: clip; max-width: 100%; }
-    .timeline-player-name.fit-sm { font-size: clamp(1.06rem, 2.25vw, 2rem); }
-    .timeline-player-name.fit-xs { font-size: clamp(.94rem, 1.95vw, 1.7rem); letter-spacing: -.04em; }
-    .timeline-player-name.fit-xxs { font-size: clamp(.82rem, 1.65vw, 1.42rem); letter-spacing: -.03em; }
+    .timeline-player-name { color: var(--white); font-size: clamp(1.35rem, 2.9vw, 2.7rem); line-height: .94; font-weight: 1000; letter-spacing: -.06em; text-transform: uppercase; white-space: normal; overflow: visible; text-overflow: initial; max-width: 100%; }
     .timeline-metric-label { color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 900; font-size: .78rem; }
 
     .timeline-graph-wrap { border: 1px solid rgba(0,213,199,.24); background: linear-gradient(160deg, rgba(0,213,199,.10), rgba(255,255,255,.045)); border-radius: 22px; overflow: hidden; min-height: 250px; }
@@ -579,23 +576,16 @@
       text-transform: uppercase;
       white-space: normal;
     }
-    .head-to-head-title .accent { color: var(--teal); }
     .head-to-head-subtitle {
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: .06em;
+      letter-spacing: .08em;
       font-weight: 900;
-      font-size: clamp(.66rem, 1.05vw, .86rem);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: clip;
+      font-size: .78rem;
     }
-    .head-to-head-subtitle.fit-sm { font-size: clamp(.60rem, .95vw, .78rem); letter-spacing: .05em; }
-    .head-to-head-subtitle.fit-xs { font-size: clamp(.54rem, .86vw, .70rem); letter-spacing: .04em; }
-    .head-to-head-subtitle.fit-xxs { font-size: clamp(.50rem, .78vw, .64rem); letter-spacing: .035em; }
     .head-to-head-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
       gap: 12px;
       align-items: stretch;
     }
@@ -615,20 +605,15 @@
     }
     .comparison-player-name {
       color: var(--white);
-      font-size: clamp(1.12rem, 2.4vw, 2rem);
-      line-height: .94;
+      font-size: clamp(1.35rem, 2.8vw, 2.35rem);
+      line-height: .95;
       font-weight: 1000;
-      letter-spacing: -.05em;
+      letter-spacing: -.06em;
       text-transform: uppercase;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
-      overflow-wrap: anywhere;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-
-    .comparison-player-name.fit-sm { font-size: clamp(1.02rem, 2.15vw, 1.72rem); }
-    .comparison-player-name.fit-xs { font-size: clamp(.92rem, 1.9vw, 1.46rem); letter-spacing: -.04em; }
-    .comparison-player-name.fit-xxs { font-size: clamp(.84rem, 1.7vw, 1.26rem); letter-spacing: -.03em; }
     .comparison-player-meta {
       margin-top: 6px;
       color: var(--muted);
@@ -703,13 +688,13 @@
       text-align: center;
     }
     .comparison-vs {
-      width: 58px;
-      height: 58px;
+      width: 78px;
+      height: 78px;
       border-radius: 999px;
       display: grid;
       place-items: center;
       color: var(--teal);
-      font-size: 1.18rem;
+      font-size: 1.55rem;
       font-weight: 1000;
       letter-spacing: -.05em;
       background: rgba(0,0,0,.28);
@@ -899,6 +884,49 @@
       white-space: nowrap;
     }
 
+
+    .site-nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 0 auto 14px;
+      width: min(100vw - 32px, 1450px);
+      flex-wrap: wrap;
+    }
+    .site-nav a {
+      color: var(--white);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 950;
+      font-size: .78rem;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(255,255,255,.06);
+      border-radius: 999px;
+      padding: 9px 12px;
+    }
+    .site-nav a.active {
+      border-color: rgba(0,213,199,.45);
+      background: rgba(0,213,199,.12);
+      color: #dffdfa;
+    }
+
+
+    /* Ranking card title fix for long team names */
+    .ranking-card #rankingCardTitle {
+      font-size: clamp(1.45rem, 2.75vw, 2.65rem) !important;
+      line-height: .94 !important;
+      letter-spacing: -.055em !important;
+      white-space: normal !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      max-width: 100% !important;
+    }
+    .ranking-card #rankingCardSub {
+      font-size: .74rem !important;
+      line-height: 1.15 !important;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 1120px) { .hero, .grid { grid-template-columns: 1fr; } }
@@ -918,13 +946,14 @@
       .team-adjust-grid { grid-template-columns: 1fr; }
       .head-to-head-toolbar { grid-template-columns: 1fr; }
       .head-to-head-grid { grid-template-columns: 1fr; }
-      .comparison-center { min-height: 44px; }
+      .comparison-center { min-height: 58px; }
       .head-to-head-card { min-height: 980px; padding: 20px; }
       .actions button { width: 100%; }
     }
   </style>
 </head>
 <body>
+  <nav class="site-nav"><a href="index.html" class="active">Player Cards</a><a href="roster-builder.html">Roster Builder</a></nav>
   <div class="wrap">
     <header class="hero">
       <section class="hero-main">
@@ -1218,7 +1247,7 @@
               <div class="timeline-top">
                 <div class="timeline-brand">
                   <div class="timeline-logo" id="timelineLogo"><span>MP</span></div>
-                  <div class="timeline-title"><span class="season">Magpie Score</span><br>Player Comparison</div>
+                  <div class="timeline-title">Magpie Score Player Comparison</div>
                 </div>
               </div>
               <div>
@@ -1265,7 +1294,7 @@
             <div class="head-to-head-content">
               <div class="head-to-head-title-row">
                 <div class="head-to-head-logo" id="headToHeadLogo"><span>MP</span></div>
-                <div class="head-to-head-title"><span class="accent">Magpie Score</span><br>Player Comparison</div>
+                <div class="head-to-head-title">Side By Side Player Comparison</div>
               </div>
               <div class="head-to-head-subtitle" id="headToHeadSubtitle">Select two player seasons to compare directly</div>
               <div id="headToHeadBody"></div>
@@ -2339,14 +2368,6 @@
       `;
     }
 
-    function comparisonNameFitClass(name) {
-      const len = String(name || '').trim().length;
-      if (len > 24) return 'fit-xxs';
-      if (len > 18) return 'fit-xs';
-      if (len > 14) return 'fit-sm';
-      return '';
-    }
-
     function renderComparisonPanel(row) {
       if (!row) {
         return `
@@ -2363,7 +2384,7 @@
       return `
         <div class="comparison-player-panel">
           <div class="comparison-player-head">
-            <div class="comparison-player-name ${comparisonNameFitClass(row.player)}">${escapeHtml(row.player)}</div>
+            <div class="comparison-player-name">${escapeHtml(row.player)}</div>
             <div class="comparison-player-meta">${escapeHtml(row.year)} • ${escapeHtml(row.position)} • ${escapeHtml(row.team || 'Team —')}</div>
           </div>
           <div class="comparison-stat-list">
@@ -2375,17 +2396,6 @@
           </div>
         </div>
       `;
-    }
-
-    function fitHeadToHeadSubtitle(textValue) {
-      const el = $('headToHeadSubtitle');
-      if (!el) return;
-      el.textContent = textValue;
-      el.classList.remove('fit-sm','fit-xs','fit-xxs');
-      const len = String(textValue || '').length;
-      if (len > 54) el.classList.add('fit-xxs');
-      else if (len > 46) el.classList.add('fit-xs');
-      else if (len > 38) el.classList.add('fit-sm');
     }
 
     function renderHeadToHeadCard() {
@@ -2400,9 +2410,9 @@
       const rowTwo = p2 && y2 ? rowForPlayerYear(p2, y2) : null;
 
       if (rowOne && rowTwo) {
-        fitHeadToHeadSubtitle(`${rowOne.player} ${rowOne.year} vs ${rowTwo.player} ${rowTwo.year}`);
+        $('headToHeadSubtitle').textContent = `${rowOne.player} ${rowOne.year} vs ${rowTwo.player} ${rowTwo.year}`;
       } else {
-        fitHeadToHeadSubtitle('Select two player seasons to compare directly');
+        $('headToHeadSubtitle').textContent = 'Select two player seasons to compare directly';
       }
 
       $('headToHeadBody').innerHTML = `
@@ -2412,17 +2422,6 @@
           ${renderComparisonPanel(rowTwo)}
         </div>
       `;
-    }
-
-    function fitTimelinePlayerNames(textValue) {
-      const el = $('timelinePlayerNames');
-      if (!el) return;
-      el.textContent = textValue;
-      el.classList.remove('fit-sm','fit-xs','fit-xxs');
-      const len = String(textValue || '').length;
-      if (len > 44) el.classList.add('fit-xxs');
-      else if (len > 34) el.classList.add('fit-xs');
-      else if (len > 24) el.classList.add('fit-sm');
     }
 
     function renderTimelineCard() {
@@ -2435,7 +2434,7 @@
       if (p1 && !$('timelinePlayerOne').value && [...$('timelinePlayerOne').options].some(o => o.value === p1)) $('timelinePlayerOne').value = p1;
 
       const names = [p1, p2].filter(Boolean);
-      fitTimelinePlayerNames(names.length ? names.join('  vs  ') : 'Select Player');
+      $('timelinePlayerNames').textContent = names.length ? names.join('  vs  ') : 'Select Player';
       $('legendOne').textContent = p1 || 'Player 1';
       $('legendTwo').textContent = p2 || 'Player 2';
       $('legendTwoWrap').style.display = p2 ? 'inline' : 'none';
@@ -2522,14 +2521,16 @@
           }
 
           const teamTitleBase = displayTeamName(team);
-          if (positionFilter === 'Forward') title = `${teamTitleBase} - Forwards • ${year || 'All Years'}`;
-          else if (positionFilter === 'Defence') title = `${teamTitleBase} - Defence • ${year || 'All Years'}`;
-          else title = `${teamTitleBase} • ${year || 'All Years'}`;
+          const yearLabel = year || 'All Years';
+
+          if (positionFilter === 'Forward') title = `${teamTitleBase} - Forwards`;
+          else if (positionFilter === 'Defence') title = `${teamTitleBase} - Defence`;
+          else title = `${teamTitleBase}`;
 
           const notes = [];
           if (rankingAddedPlayer) notes.push('+1 added');
           if (rankingRemovedPlayers.length) notes.push(`${rankingRemovedPlayers.length} removed`);
-          subtitle = `Minimum ${whole(minGP)} GP${notes.length ? ' • ' + notes.join(' • ') : ''}`;
+          subtitle = `${yearLabel} • Minimum ${whole(minGP)} GP${notes.length ? ' • ' + notes.join(' • ') : ''}`;
         } else {
           rows = [];
           title = year ? `Select a Team • ${year}` : 'Select a Team';
