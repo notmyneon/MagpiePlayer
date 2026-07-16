@@ -687,16 +687,205 @@
       padding: 6px;
     }
 
+
+    .movement-panel {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .movement-controls {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) minmax(240px, 1.4fr) repeat(4, auto);
+      gap: 10px;
+      align-items: end;
+    }
+    .movement-card {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(0,213,199,.21), transparent 17rem),
+        linear-gradient(135deg, #050708 0%, #0c1416 47%, #020304 100%);
+      border: 1px solid rgba(0,213,199,.34);
+      box-shadow: 0 30px 95px rgba(0,0,0,.56), inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .movement-card:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(115deg, transparent 0 43%, rgba(0,213,199,.14) 43% 44.2%, transparent 44.2% 54%, rgba(255,255,255,.06) 54% 54.6%, transparent 54.6%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.033) 0 1px, transparent 1px 22px);
+      opacity: .72;
+      pointer-events: none;
+    }
+    .movement-card-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+    }
+    .movement-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+    }
+    .movement-title {
+      color: var(--white);
+      font-size: clamp(1.85rem, 3.6vw, 3.35rem);
+      line-height: .9;
+      font-weight: 1000;
+      letter-spacing: -.065em;
+      text-transform: uppercase;
+    }
+    .movement-title .accent { color: var(--teal); }
+    .movement-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .78rem;
+      font-weight: 900;
+    }
+    .movement-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .movement-score-box {
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(0,213,199,.14), rgba(255,255,255,.055));
+      border: 1px solid rgba(0,213,199,.25);
+    }
+    .movement-score-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .68rem;
+      font-weight: 1000;
+    }
+    .movement-score-value {
+      margin-top: 8px;
+      color: var(--teal);
+      font-size: clamp(2rem, 4.2vw, 3.6rem);
+      line-height: .86;
+      font-weight: 1000;
+      letter-spacing: -.07em;
+    }
+    .movement-score-value.negative { color: #ff8585; }
+    .movement-lists {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+    .movement-list-card {
+      border: 1px solid rgba(0,213,199,.22);
+      background: rgba(0,0,0,.20);
+      border-radius: 18px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .movement-list-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .82rem;
+      font-weight: 1000;
+    }
+    .movement-list-head span:last-child {
+      color: var(--teal);
+      font-size: .9rem;
+      letter-spacing: -.02em;
+    }
+    .movement-player-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+    }
+    .movement-player-row:last-child { border-bottom: 0; }
+    .movement-player-name {
+      color: var(--white);
+      font-weight: 950;
+      font-size: .88rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .movement-player-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      font-size: .66rem;
+      font-weight: 850;
+    }
+    .movement-player-score {
+      color: var(--teal);
+      font-size: 1rem;
+      font-weight: 1000;
+      letter-spacing: -.03em;
+      white-space: nowrap;
+    }
+    .movement-empty {
+      padding: 16px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: .74rem;
+      font-weight: 900;
+    }
+    .movement-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .movement-stat {
+      padding: 11px;
+      border-radius: 15px;
+      background: rgba(255,255,255,.075);
+      border: 1px solid rgba(255,255,255,.11);
+      text-align: center;
+    }
+    .movement-stat-label {
+      color: var(--muted);
+      font-size: .64rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 900;
+    }
+    .movement-stat-value {
+      margin-top: 6px;
+      color: var(--white);
+      font-size: 1.15rem;
+      line-height: 1;
+      font-weight: 1000;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
       .top-controls, .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .pool-controls, .pool-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .movement-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .movement-lists { grid-template-columns: 1fr; }
       .toi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
       .wrap { width: min(100vw - 22px, 1440px); padding-top: 14px; }
-      .top-controls, .summary-grid, .stat-grid, .toi-grid, .pool-controls, .pool-actions { grid-template-columns: 1fr; }
+      .top-controls, .summary-grid, .stat-grid, .toi-grid, .pool-controls, .pool-actions, .movement-controls, .movement-summary, .movement-stat-grid { grid-template-columns: 1fr; }
       .lineup-line, .lineup-line.defence { grid-template-columns: 1fr; }
       .line-label { align-self: start; }
       .card-logo, .brand-logo { width: 58px; height: 58px; flex-basis: 58px; }
@@ -880,6 +1069,81 @@
         <div class="selection-panel" id="selectionPanel"></div>
       </aside>
     </main>
+
+    <section class="panel movement-panel">
+      <div>
+        <h2 class="section-title">Player Movement Card</h2>
+        <div class="movement-controls">
+          <div>
+            <label for="movementSearch">Search Players</label>
+            <input id="movementSearch" placeholder="Search player name..." />
+          </div>
+          <div>
+            <label for="movementPlayerSelect">Player</label>
+            <select id="movementPlayerSelect"><option value="">Select player</option></select>
+          </div>
+          <button class="secondary" id="addGainedBtn" type="button">Add Gained</button>
+          <button class="secondary" id="addLostBtn" type="button">Add Lost</button>
+          <button class="secondary" id="clearMovementBtn" type="button">Clear Movement</button>
+          <button class="secondary" id="downloadMovementBtn" type="button">Download Movement PNG</button>
+        </div>
+        <p class="mini-note">Movement candidates use the selected year and Minimum GP filter. Team filter is ignored so you can compare incoming and outgoing players freely.</p>
+      </div>
+
+      <article class="movement-card" id="movementCard">
+        <div class="movement-card-content">
+          <div class="movement-top">
+            <div class="card-logo" id="movementLogo"><span>MP</span></div>
+            <div>
+              <div class="movement-title"><span class="accent">Grit</span> Movement</div>
+              <div class="movement-subtitle" id="movementSubtitle">Select gained and lost players</div>
+            </div>
+          </div>
+
+          <div class="movement-summary">
+            <div class="movement-score-box">
+              <div class="movement-score-label">Grit Gained</div>
+              <div class="movement-score-value" id="movementGainedScore">0.00</div>
+            </div>
+            <div class="movement-score-box">
+              <div class="movement-score-label">Grit Lost</div>
+              <div class="movement-score-value negative" id="movementLostScore">0.00</div>
+            </div>
+            <div class="movement-score-box">
+              <div class="movement-score-label">Net Grit</div>
+              <div class="movement-score-value" id="movementNetScore">0.00</div>
+            </div>
+          </div>
+
+          <div class="movement-lists">
+            <div class="movement-list-card">
+              <div class="movement-list-head"><span>Gained</span><span id="movementGainedCount">0 Players</span></div>
+              <div id="movementGainedList"></div>
+            </div>
+            <div class="movement-list-card">
+              <div class="movement-list-head"><span>Lost</span><span id="movementLostCount">0 Players</span></div>
+              <div id="movementLostList"></div>
+            </div>
+          </div>
+
+          <div class="movement-stat-grid">
+            <div class="movement-stat">
+              <div class="movement-stat-label">Net Hits / Game</div>
+              <div class="movement-stat-value" id="movementNetHits">0.00</div>
+            </div>
+            <div class="movement-stat">
+              <div class="movement-stat-label">Net Blocks / Game</div>
+              <div class="movement-stat-value" id="movementNetBlocks">0.00</div>
+            </div>
+            <div class="movement-stat">
+              <div class="movement-stat-label">Net Takeaways / Game</div>
+              <div class="movement-stat-value" id="movementNetTakeaways">0.00</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
   </div>
 
   <script>
@@ -889,6 +1153,8 @@
     let selected = {};
     let rosterLoadMode = 'pool';
     let customPool = [];
+    let movementGained = [];
+    let movementLost = [];
 
     const $ = id => document.getElementById(id);
     function clean(value) { return String(value ?? '').trim(); }
@@ -1393,6 +1659,139 @@
       }
     }
 
+    function movementCandidateRows() {
+      const year = $('yearSelect').value;
+      const minimumGP = minGP();
+      const query = clean($('movementSearch')?.value).toLowerCase();
+
+      let rows = aggregateRecords().filter(r => r.year === year && r.gp >= minimumGP);
+      if (query) rows = rows.filter(r => r.player.toLowerCase().includes(query));
+
+      const used = new Set([...movementGained, ...movementLost]);
+      return rows
+        .filter(r => !used.has(r.key))
+        .sort(comparePlayersForDropdown)
+        .slice(0, 300);
+    }
+
+    function movementRows(keys) {
+      const year = $('yearSelect').value;
+      const minimumGP = minGP();
+      const keySet = new Set(keys);
+
+      return aggregateRecords()
+        .filter(r => r.year === year && r.gp >= minimumGP && keySet.has(r.key))
+        .sort((a,b) => b.score - a.score || b.gp - a.gp || a.player.localeCompare(b.player));
+    }
+
+    function movementPerGame(row) {
+      const gp = row.gp || 1;
+      return {
+        score: row.score,
+        hits: row.hits / gp,
+        blocked: row.blocked / gp,
+        takeaways: row.takeaways / gp
+      };
+    }
+
+    function movementTotals(keys) {
+      const rows = movementRows(keys);
+      const totals = { count: rows.length, score: 0, hits: 0, blocked: 0, takeaways: 0 };
+      rows.forEach(row => {
+        const pg = movementPerGame(row);
+        totals.score += pg.score;
+        totals.hits += pg.hits;
+        totals.blocked += pg.blocked;
+        totals.takeaways += pg.takeaways;
+      });
+      return totals;
+    }
+
+    function addMovementPlayer(type) {
+      const key = $('movementPlayerSelect')?.value;
+      if (!key) return;
+
+      movementGained = movementGained.filter(k => k !== key);
+      movementLost = movementLost.filter(k => k !== key);
+
+      if (type === 'gained') movementGained.push(key);
+      else movementLost.push(key);
+
+      renderMovementCard();
+    }
+
+    function removeMovementPlayer(type, key) {
+      if (type === 'gained') movementGained = movementGained.filter(k => k !== key);
+      else movementLost = movementLost.filter(k => k !== key);
+      renderMovementCard();
+    }
+
+    function renderMovementList(containerId, keys, type) {
+      const rows = movementRows(keys);
+      if (!rows.length) {
+        $(containerId).innerHTML = '<div class="movement-empty">No players selected</div>';
+        return;
+      }
+
+      $(containerId).innerHTML = rows.map(row => `
+        <div class="movement-player-row" title="${escapeAttr(row.player)}">
+          <div>
+            <div class="movement-player-name">${escapeHtml(row.player)}</div>
+            <div class="movement-player-meta">${escapeHtml(row.team || 'Team —')} • ${escapeHtml(positionShort(row.position))} • ${whole(row.gp)} GP</div>
+          </div>
+          <div>
+            <div class="movement-player-score">${fmt(row.score)}</div>
+            <button class="secondary" style="width:auto;padding:3px 7px;margin-top:4px;font-size:.62rem;letter-spacing:0;text-transform:none;" type="button" data-move-remove="${escapeAttr(type)}|${escapeAttr(row.key)}">Remove</button>
+          </div>
+        </div>
+      `).join('');
+
+      $(containerId).querySelectorAll('[data-move-remove]').forEach(button => {
+        button.addEventListener('click', () => {
+          const [removeType, key] = button.dataset.moveRemove.split('|');
+          removeMovementPlayer(removeType, key);
+        });
+      });
+    }
+
+    function renderMovementCard() {
+      const select = $('movementPlayerSelect');
+      if (!select) return;
+
+      const previous = select.value;
+      const candidates = movementCandidateRows();
+
+      select.innerHTML = '<option value="">Select player</option>' + candidates.map(row =>
+        `<option value="${escapeAttr(row.key)}">${escapeHtml(row.player)} • ${escapeHtml(row.team || 'Team —')} • ${escapeHtml(positionShort(row.position))} • ${whole(row.gp)} GP • ${fmt(row.score)}</option>`
+      ).join('');
+
+      if (candidates.some(row => row.key === previous)) select.value = previous;
+
+      const gained = movementTotals(movementGained);
+      const lost = movementTotals(movementLost);
+      const net = {
+        score: gained.score - lost.score,
+        hits: gained.hits - lost.hits,
+        blocked: gained.blocked - lost.blocked,
+        takeaways: gained.takeaways - lost.takeaways
+      };
+
+      const year = $('yearSelect').value || 'Year';
+      $('movementSubtitle').textContent = `${year} • Magpie Score movement`;
+      $('movementGainedScore').textContent = fmt(gained.score);
+      $('movementLostScore').textContent = fmt(lost.score);
+      $('movementNetScore').textContent = `${net.score >= 0 ? '+' : ''}${fmt(net.score)}`;
+      $('movementNetScore').classList.toggle('negative', net.score < 0);
+      $('movementGainedCount').textContent = `${gained.count} Player${gained.count === 1 ? '' : 's'}`;
+      $('movementLostCount').textContent = `${lost.count} Player${lost.count === 1 ? '' : 's'}`;
+      $('movementNetHits').textContent = `${net.hits >= 0 ? '+' : ''}${fmt(net.hits)}`;
+      $('movementNetBlocks').textContent = `${net.blocked >= 0 ? '+' : ''}${fmt(net.blocked)}`;
+      $('movementNetTakeaways').textContent = `${net.takeaways >= 0 ? '+' : ''}${fmt(net.takeaways)}`;
+
+      renderMovementList('movementGainedList', movementGained, 'gained');
+      renderMovementList('movementLostList', movementLost, 'lost');
+    }
+
     function renderSelectionPanel() {
       const groups = [];
       for (let i = 0; i < rosterSlots.length; ) {
@@ -1511,6 +1910,7 @@
       rebuildControls();
       validateSelectedPlayers();
       renderCustomPoolPanel();
+      renderMovementCard();
       renderSelectionPanel();
       renderCard();
     }
@@ -1651,7 +2051,7 @@
     }
 
     function setLogo(dataUrl) {
-      for (const target of [$('heroLogo'), $('cardLogo')]) {
+      for (const target of [$('heroLogo'), $('cardLogo'), $('movementLogo')]) {
         if (!target) continue;
         target.innerHTML = dataUrl ? `<img alt="Magpie logo" src="${dataUrl}">` : '<span>MP</span>';
       }
@@ -1659,6 +2059,32 @@
 
     function safeFileName(value) {
       return clean(value).replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase() || 'magpie-score';
+    }
+
+    async function downloadCardElementPNG(cardId, fileName, width = 1400, minHeight = 800) {
+      const card = $(cardId);
+      const clone = card.cloneNode(true);
+      const currentHeight = Math.ceil(card.getBoundingClientRect().height || card.offsetHeight || minHeight);
+      const height = Math.max(minHeight, currentHeight);
+      const html = `<style>${document.querySelector('style').textContent}</style><div style="width:${width}px;height:${height}px;background:#050708;"><div style="width:${width}px;height:${height}px;">${clone.outerHTML}</div></div>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${html.replace(/#/g, '%23')}</foreignObject></svg>`;
+      const img = new Image();
+      const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0);
+        const a = document.createElement('a');
+        a.download = `${safeFileName(fileName)}.png`;
+        a.href = canvas.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+      img.onerror = () => alert('PNG export failed in this browser. Use your screenshot tool instead.');
+      img.src = url;
     }
 
     async function downloadRosterPNG() {
@@ -1700,6 +2126,15 @@
     $('clearRosterBtn').addEventListener('click', clearRoster);
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
+    $('movementSearch').addEventListener('input', renderMovementCard);
+    $('addGainedBtn').addEventListener('click', () => addMovementPlayer('gained'));
+    $('addLostBtn').addEventListener('click', () => addMovementPlayer('lost'));
+    $('clearMovementBtn').addEventListener('click', () => {
+      movementGained = [];
+      movementLost = [];
+      renderMovementCard();
+    });
+    $('downloadMovementBtn').addEventListener('click', () => downloadCardElementPNG('movementCard', 'magpie-score-grit-movement', 1400, 820));
     $('poolSearch').addEventListener('input', renderCustomPoolPanel);
     $('addPoolPlayerBtn').addEventListener('click', () => addPlayerToPool($('poolCandidateSelect').value));
     $('addCurrentFilterPoolBtn').addEventListener('click', addCurrentFilterToPool);
