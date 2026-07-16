@@ -847,6 +847,17 @@
       font-size: .74rem;
       font-weight: 900;
     }
+
+
+    .movement-title {
+      font-size: clamp(1.65rem, 3.15vw, 3rem) !important;
+      white-space: normal !important;
+    }
+
+    .movement-list-head .hidden-count {
+      display: none !important;
+    }
+
     .movement-stat-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1099,7 +1110,7 @@
           <div class="movement-top">
             <div class="card-logo" id="movementLogo"><span>MP</span></div>
             <div>
-              <div class="movement-title"><span class="accent">Grit</span> Movement</div>
+              <div class="movement-title"><span class="accent">Magpie Score</span> Player Movement</div>
               <div class="movement-subtitle" id="movementSubtitle">Select gained and lost players</div>
             </div>
           </div>
@@ -1121,11 +1132,11 @@
 
           <div class="movement-lists">
             <div class="movement-list-card">
-              <div class="movement-list-head"><span>Gained</span><span id="movementGainedCount">0 Players</span></div>
+              <div class="movement-list-head"><span>In</span><span id="movementGainedCount" class="hidden-count">0 Players</span></div>
               <div id="movementGainedList"></div>
             </div>
             <div class="movement-list-card">
-              <div class="movement-list-head"><span>Lost</span><span id="movementLostCount">0 Players</span></div>
+              <div class="movement-list-head"><span>Out</span><span id="movementLostCount" class="hidden-count">0 Players</span></div>
               <div id="movementLostList"></div>
             </div>
           </div>
