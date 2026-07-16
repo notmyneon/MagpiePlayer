@@ -861,7 +861,7 @@
 
     /* Narrower player movement card */
     .movement-card {
-      width: min(100%, 1120px) !important;
+      width: min(100%, 900px) !important;
       margin: 0 auto !important;
       padding: 22px !important;
     }
@@ -928,6 +928,69 @@
       font-size: 1.15rem;
       line-height: 1;
       font-weight: 1000;
+    }
+
+
+    /* Extra narrow player movement card */
+    .movement-card {
+      max-width: 900px !important;
+      padding: 20px !important;
+    }
+    .movement-card-content {
+      gap: 12px !important;
+    }
+    .movement-title {
+      font-size: clamp(1.35rem, 2.7vw, 2.35rem) !important;
+      white-space: nowrap !important;
+    }
+    .movement-top .card-logo {
+      width: 54px !important;
+      height: 54px !important;
+      flex-basis: 54px !important;
+    }
+    .movement-summary {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+    .movement-score-box {
+      padding: 12px 14px !important;
+    }
+    .movement-score-label {
+      font-size: .62rem !important;
+    }
+    .movement-score-value {
+      font-size: clamp(1.7rem, 3.4vw, 2.85rem) !important;
+    }
+    .movement-lists {
+      gap: 8px !important;
+    }
+    .movement-list-head {
+      padding: 9px 11px !important;
+      font-size: .78rem !important;
+    }
+    .movement-player-row {
+      padding: 7px 11px !important;
+    }
+    .movement-player-name {
+      font-size: .78rem !important;
+    }
+    .movement-player-meta {
+      font-size: .58rem !important;
+    }
+    .movement-player-score {
+      font-size: .88rem !important;
+    }
+    .movement-stat-grid {
+      gap: 8px !important;
+    }
+    .movement-stat {
+      padding: 9px !important;
+    }
+    .movement-stat-label {
+      font-size: .58rem !important;
+    }
+    .movement-stat-value {
+      font-size: 1rem !important;
     }
 
     @media (max-width: 1200px) {
@@ -2196,7 +2259,7 @@
       movementLost = [];
       renderMovementCard();
     });
-    $('downloadMovementBtn').addEventListener('click', () => downloadCardElementPNG('movementCard', 'magpie-score-player-movement', 1120, 760));
+    $('downloadMovementBtn').addEventListener('click', () => downloadCardElementPNG('movementCard', 'magpie-score-player-movement', 900, 720));
     $('poolSearch').addEventListener('input', renderCustomPoolPanel);
     $('addPoolPlayerBtn').addEventListener('click', () => addPlayerToPool($('poolCandidateSelect').value));
     $('addCurrentFilterPoolBtn').addEventListener('click', addCurrentFilterToPool);
