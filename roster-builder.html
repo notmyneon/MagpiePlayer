@@ -695,7 +695,7 @@
     }
     .movement-controls {
       display: grid;
-      grid-template-columns: minmax(170px, 1fr) minmax(240px, 1.4fr) repeat(4, auto);
+      grid-template-columns: minmax(160px, 1fr) minmax(220px, 1.2fr) minmax(220px, 1.2fr) repeat(4, auto);
       gap: 10px;
       align-items: end;
     }
@@ -1081,6 +1081,10 @@
           <div>
             <label for="movementPlayerSelect">Player</label>
             <select id="movementPlayerSelect"><option value="">Select player</option></select>
+          </div>
+          <div>
+            <label for="movementSubtitleInput">Movement Card Subtitle</label>
+            <input id="movementSubtitleInput" placeholder="Example: Vancouver off-season movement" />
           </div>
           <button class="secondary" id="addGainedBtn" type="button">Add Gained</button>
           <button class="secondary" id="addLostBtn" type="button">Add Lost</button>
@@ -1777,7 +1781,8 @@
       };
 
       const year = $('yearSelect').value || 'Year';
-      $('movementSubtitle').textContent = `${year} • Magpie Score movement`;
+      const customSubtitle = clean($('movementSubtitleInput')?.value);
+      $('movementSubtitle').textContent = customSubtitle || `${year} • Magpie Score movement`;
       $('movementGainedScore').textContent = fmt(gained.score);
       $('movementLostScore').textContent = fmt(lost.score);
       $('movementNetScore').textContent = `${net.score >= 0 ? '+' : ''}${fmt(net.score)}`;
@@ -2127,6 +2132,7 @@
     $('reloadDataBtn').addEventListener('click', loadHostedData);
     $('downloadRosterBtn').addEventListener('click', downloadRosterPNG);
     $('movementSearch').addEventListener('input', renderMovementCard);
+    $('movementSubtitleInput').addEventListener('input', renderMovementCard);
     $('addGainedBtn').addEventListener('click', () => addMovementPlayer('gained'));
     $('addLostBtn').addEventListener('click', () => addMovementPlayer('lost'));
     $('clearMovementBtn').addEventListener('click', () => {
