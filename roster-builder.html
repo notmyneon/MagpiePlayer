@@ -993,6 +993,49 @@
       font-size: 1rem !important;
     }
 
+
+    /* Player movement readability restore while keeping narrow width */
+    .movement-card {
+      width: min(100%, 900px) !important;
+      max-width: 900px !important;
+      padding: 22px !important;
+    }
+    .movement-title {
+      font-size: clamp(1.55rem, 3vw, 2.65rem) !important;
+      white-space: nowrap !important;
+    }
+    .movement-subtitle {
+      font-size: .78rem !important;
+    }
+    .movement-player-row {
+      padding: 10px 13px !important;
+    }
+    .movement-player-name {
+      font-size: .96rem !important;
+      line-height: 1.08 !important;
+      letter-spacing: -.025em !important;
+    }
+    .movement-player-meta {
+      font-size: .70rem !important;
+      line-height: 1.15 !important;
+    }
+    .movement-player-score {
+      font-size: 1.08rem !important;
+    }
+    .movement-list-head {
+      font-size: .88rem !important;
+      padding: 10px 13px !important;
+    }
+    .movement-score-label {
+      font-size: .68rem !important;
+    }
+    .movement-stat-label {
+      font-size: .64rem !important;
+    }
+    .movement-stat-value {
+      font-size: 1.12rem !important;
+    }
+
     @media (max-width: 1200px) {
       .builder-grid, .card-main-grid, .lineup-card-grid { grid-template-columns: 1fr; }
       .selection-panel { max-height: none; }
@@ -2259,7 +2302,7 @@
       movementLost = [];
       renderMovementCard();
     });
-    $('downloadMovementBtn').addEventListener('click', () => downloadCardElementPNG('movementCard', 'magpie-score-player-movement', 900, 720));
+    $('downloadMovementBtn').addEventListener('click', () => downloadCardElementPNG('movementCard', 'magpie-score-player-movement', 900, 760));
     $('poolSearch').addEventListener('input', renderCustomPoolPanel);
     $('addPoolPlayerBtn').addEventListener('click', () => addPlayerToPool($('poolCandidateSelect').value));
     $('addCurrentFilterPoolBtn').addEventListener('click', addCurrentFilterToPool);
