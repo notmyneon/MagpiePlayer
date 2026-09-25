@@ -20,9 +20,12 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .magpie-logo{width:60px;height:50px;object-fit:contain;flex:none;border-radius:9px}
 .card-brand{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
 .card-brand .eyebrow{font-size:.84rem}
-.player-card .card-brand{justify-content:flex-start;gap:12px}
+.player-card .card-brand{justify-content:flex-start;gap:12px;margin-top:6px}
 .player-card .card-brand .magpie-logo{width:66px;height:58px}
 .player-card .card-brand .eyebrow{font-size:clamp(1.65rem,2.65vw,2.15rem);line-height:1.1;letter-spacing:.04em;white-space:nowrap}
+.player-card .player-card-head{align-items:flex-start;gap:10px;padding:10px 0 16px}
+.player-card .player-title-wrap{gap:10px;padding-top:8px}
+.player-card .score-orb{flex-basis:112px}
 .timeline-heading,.team-title-block,.roster-card-title,.team-brand,.roster-brand,.compare-player-title{display:flex;align-items:center;gap:12px;min-width:0}
 .timeline-heading h2,.team-title-block h2,.roster-card-title h2{line-height:1.12}
 .timeline-heading .magpie-logo{width:58px;height:48px}
@@ -86,3 +89,4 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 @media(max-width:560px){.team-title-block,.roster-card-title{align-items:flex-start}.team-card-logo{width:48px;height:48px}.team-brand,.roster-brand{align-items:flex-start}.team-brand .magpie-logo,.roster-brand .magpie-logo{width:40px;height:38px}.roster-card-options{grid-template-columns:1fr}.compare-timeline-controls{flex-wrap:wrap;justify-content:flex-start}.comparison-timeline{padding:14px}.comparison-timeline .chart-wrap{height:240px}.compare-legend{font-size:.65rem}.compare-player-title{flex-wrap:wrap;gap:4px}.compare-row{grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr)}.compare-value{font-size:.85rem;flex-wrap:wrap;gap:2px}.percentile{font-size:.52rem}.team-table-head,.team-row{grid-template-columns:26px minmax(115px,1fr) 44px 44px 44px 56px;font-size:.68rem}.team-table-head span:nth-child(3),.team-row span:nth-child(3),.team-table-head span:nth-child(4),.team-row span:nth-child(4){display:none}.team-table-head span:nth-child(7),.team-row span:nth-child(7){display:block}}
 @media(max-width:560px){.team-card{padding:12px}.team-card-head{flex-wrap:wrap}.team-brand{margin-left:auto}.team-table-head,.team-row{grid-template-columns:20px minmax(72px,1fr) repeat(3,32px) 48px;gap:4px}.team-table-head{padding:0 4px 6px;font-size:.63rem}.team-row{padding:5px 4px;font-size:.85rem}}
 @media(max-width:560px){.player-card .card-brand{gap:9px}.player-card .card-brand .magpie-logo{width:48px;height:44px}.player-card .card-brand .eyebrow{font-size:clamp(1.45rem,6.5vw,1.8rem)}}
+@media(max-width:560px){.player-card .score-orb{flex-basis:96px}.player-card .player-title-wrap{padding-top:7px}}
