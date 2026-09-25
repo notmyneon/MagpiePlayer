@@ -11,7 +11,7 @@ const displaySeason = y => clean(y) ? `${y}-${String(Number(y)+1).slice(-2)}` : 
 const state = {
   rawCore: [], rows: [], byKey: new Map(), byPlayer: new Map(), seasons: [], teamsBySeason: new Map(),
   fullSeasonCache: new Map(), fullManifest: null, teamAddedKey:'', teamRemoved:new Set(), rosterSelected:{},
-  roleConfig:null
+  roleConfig:null, showPlayerLogo:true
 };
 
 function parseCSV(text){
@@ -81,10 +81,23 @@ function playerNames(){return [...state.byPlayer.keys()].sort((a,b)=>a.localeCom
 function setOptions(el,html,preferred){if(!el)return;el.innerHTML=html;if(preferred&&[...el.options].some(o=>o.value===preferred))el.value=preferred;}
 function populatePlayerSelect(el,preferred){setOptions(el,playerNames().map(p=>opt(p)).join(''),preferred||playerNames()[0]);}
 function seasonsForPlayer(p){return (state.byPlayer.get(p)||[]).map(r=>r.season).sort((a,b)=>num(b)-num(a));}
+function nhlLogoTeam(team){const parts=clean(team).split(',').map(clean).filter(Boolean);const raw=(parts[parts.length-1]||'').toUpperCase();return ({LA:'LAK',TB:'TBL',NJ:'NJD',SJ:'SJS'})[raw]||raw}
+function updatePlayerLogo(r){
+  const img=$('playerTeamLogo'),toggle=$('showPlayerLogo');if(!img||!toggle)return;
+  state.showPlayerLogo=toggle.checked;
+  try{localStorage.setItem('magpieShowPlayerLogo',state.showPlayerLogo?'1':'0')}catch(_){}
+  const team=r?nhlLogoTeam(r.team):'';
+  if(!state.showPlayerLogo||!team){img.classList.add('hidden');img.removeAttribute('src');img.alt='';return}
+  img.alt=`${team} logo`;img.title=`${team} logo`;img.classList.remove('hidden');
+  img.onerror=()=>img.classList.add('hidden');
+  img.src=`https://assets.nhle.com/logos/nhl/svg/${encodeURIComponent(team)}_light.svg`;
+}
 
 function populateAllControls(){
   const names=playerNames(); const first=names.find(x=>x==='Cale Makar')||names[0];
   populatePlayerSelect($('playerSelect'),first); syncPlayerSeason();
+  try{state.showPlayerLogo=localStorage.getItem('magpieShowPlayerLogo')!=='0'}catch(_){state.showPlayerLogo=true}
+  if($('showPlayerLogo'))$('showPlayerLogo').checked=state.showPlayerLogo;
   populatePlayerSelect($('comparePlayerA'),first); populatePlayerSelect($('comparePlayerB'),names.find(x=>x==='Brady Tkachuk')||names[1]); syncCompareSeasons('A');syncCompareSeasons('B');
   const yearHtml=state.seasons.map(s=>opt(s,displaySeason(s))).join(''); setOptions($('teamSeason'),yearHtml,state.seasons[0]); setOptions($('rosterSeason'),yearHtml,state.seasons[0]);
   syncTeamList(); syncRosterTeamList(); buildRoleSettings(); buildLineupEditor();
@@ -94,6 +107,7 @@ function bindEvents(){
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
   $('playerSearch').addEventListener('input',()=>{const q=clean($('playerSearch').value).toLowerCase();const names=playerNames().filter(p=>p.toLowerCase().includes(q));const prev=$('playerSelect').value;setOptions($('playerSelect'),names.slice(0,250).map(opt).join(''),names.includes(prev)?prev:names[0]);syncPlayerSeason();renderPlayer();});
   $('playerSelect').addEventListener('change',()=>{syncPlayerSeason();renderPlayer();});$('playerSeason').addEventListener('change',renderPlayer);$('timelineMetric').addEventListener('change',renderTimeline);
+  $('showPlayerLogo').addEventListener('change',()=>updatePlayerLogo(currentPlayerRow()));
   $('comparePlayerA').addEventListener('change',()=>{syncCompareSeasons('A');renderCompare()});$('comparePlayerB').addEventListener('change',()=>{syncCompareSeasons('B');renderCompare()});$('compareSeasonA').addEventListener('change',renderCompare);$('compareSeasonB').addEventListener('change',renderCompare);
   $('teamSeason').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();syncTeamList();renderTeamCard()});$('teamSelect').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});['teamMinGP','teamPosition'].forEach(id=>$(id).addEventListener('input',renderTeamCard));['teamHighlightA','teamHighlightB'].forEach(id=>$(id).addEventListener('change',renderTeamTable));$('teamAddSearch').addEventListener('input',renderTeamAdjusters);$('teamRemoveSearch').addEventListener('input',renderTeamAdjusters);$('resetTeamChanges').addEventListener('click',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});
   $('rosterSeason').addEventListener('change',()=>{state.rosterSelected={};syncRosterTeamList();buildLineupEditor();renderRosterCard()});$('rosterTeam').addEventListener('change',()=>{buildLineupEditor();renderRosterCard()});$('rosterMinGP').addEventListener('input',()=>{buildLineupEditor();renderRosterCard()});$('clearRosterBtn').addEventListener('click',()=>{state.rosterSelected={};buildLineupEditor();renderRosterCard()});$('autoTeamBtn').addEventListener('click',autoLoadTeam);$('autoBestBtn').addEventListener('click',autoBest);$('resetRoleBtn').addEventListener('click',()=>{state.roleConfig=defaultRoleConfig();buildRoleSettings();buildLineupEditor();renderRosterCard()});
@@ -109,7 +123,7 @@ function rankOf(r,field){const pool=poolForRow(r).slice().sort((a,b)=>num(b[fiel
 function rankText(r,field){const x=rankOf(r,field);return x?`#${x.rank} of ${x.n} ${r.position==='D'?'D':'F'}`:'—'}
 function renderPlayer(){
   const r=currentPlayerRow();if(!r)return;
-  $('playerCardSeason').textContent=displaySeason(r.season);$('playerCardTeam').textContent=r.team||'—';$('playerCardName').textContent=r.player;$('playerCardMeta').textContent=`${r.position==='D'?'Defence':'Forward'} • ${whole(r.gp)} GP`;$('playerScore').textContent=fmt(r.score);$('playerRank').textContent=rankText(r,'score');$('playerHits').textContent=whole(r.hits);$('playerBlocks').textContent=whole(r.blocked);$('playerTakeaways').textContent=whole(r.takeaways);$('playerHitsRank').textContent=rankText(r,'hits');$('playerBlocksRank').textContent=rankText(r,'blocked');$('playerTakeawaysRank').textContent=rankText(r,'takeaways');$('playerGF').textContent=whole(r.goalsFor);$('playerSF').textContent=whole(r.shotsFor);$('playerGA').textContent=whole(r.goalsAgainst);$('playerSA').textContent=whole(r.shotsAgainst);$('playerTOI').textContent=fmt(r.avgtoi,1);
+  $('playerCardSeason').textContent=displaySeason(r.season);$('playerCardTeam').textContent=r.team||'—';$('playerCardName').textContent=r.player;$('playerCardMeta').textContent=`${r.position==='D'?'Defence':'Forward'} • ${whole(r.gp)} GP`;updatePlayerLogo(r);$('playerScore').textContent=fmt(r.score);$('playerRank').textContent=rankText(r,'score');$('playerHits').textContent=whole(r.hits);$('playerBlocks').textContent=whole(r.blocked);$('playerTakeaways').textContent=whole(r.takeaways);$('playerHitsRank').textContent=rankText(r,'hits');$('playerBlocksRank').textContent=rankText(r,'blocked');$('playerTakeawaysRank').textContent=rankText(r,'takeaways');$('playerGF').textContent=whole(r.goalsFor);$('playerSF').textContent=whole(r.shotsFor);$('playerGA').textContent=whole(r.goalsAgainst);$('playerSA').textContent=whole(r.shotsAgainst);$('playerTOI').textContent=fmt(r.avgtoi,1);
   renderTimeline();
 }
 function metricVal(r,m){return m==='score'?r.score:num(r[m])}
