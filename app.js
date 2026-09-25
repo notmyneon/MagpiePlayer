@@ -60,9 +60,9 @@ async function init(){
     const manifestResp=await fetch('data/manifest.json',{cache:'no-store'});
     if(!manifestResp.ok)throw new Error(`manifest.json ${manifestResp.status}`);
     state.fullManifest=await manifestResp.json();
-    const coreBundles=['2008-2010','2011-2013','2014-2016','2017-2019','2020-2022','2023-2025'];
-    const coreResponses=await Promise.all(coreBundles.map(name=>fetch(`data/bundles/${name}.csv`,{cache:'no-store'})));
-    const bad=coreResponses.find(r=>!r.ok); if(bad)throw new Error(`Core data bundle failed: ${bad.status}`);
+    const coreFiles=['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021a','2021b','2022','2023','2024','2025'];
+    const coreResponses=await Promise.all(coreFiles.map(name=>fetch(`data/core/${name}.csv`,{cache:'no-store'})));
+    const bad=coreResponses.find(r=>!r.ok); if(bad)throw new Error(`Core season file failed: ${bad.status}`);
     const coreTexts=await Promise.all(coreResponses.map(r=>r.text()));
     state.rawCore=coreTexts.flatMap(csvObjects); state.rows=aggregateCore(state.rawCore);
     buildIndexes(); populateAllControls(); bindEvents(); renderAll();
