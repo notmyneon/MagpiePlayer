@@ -44,15 +44,19 @@
             <option value="blocked">Blocked Shots</option>
             <option value="takeaways">Takeaways</option>
           </select></label>
+          <label class="logo-toggle">Team logo<span class="check-control"><input id="showPlayerLogo" type="checkbox" checked><span>Show beside name</span></span></label>
         </div>
 
         <div class="player-layout">
           <article class="player-card card-surface" id="playerCard">
             <div class="card-kicker"><span id="playerCardSeason">—</span><span id="playerCardTeam">—</span></div>
             <div class="player-card-head">
-              <div>
-                <h2 id="playerCardName">Select a player</h2>
-                <div class="player-meta" id="playerCardMeta">—</div>
+              <div class="player-title-wrap">
+                <img id="playerTeamLogo" class="player-team-logo hidden" alt="">
+                <div>
+                  <h2 id="playerCardName">Select a player</h2>
+                  <div class="player-meta" id="playerCardMeta">—</div>
+                </div>
               </div>
               <div class="score-orb"><small>MAGPIE</small><strong id="playerScore">—</strong><span id="playerRank">—</span></div>
             </div>
