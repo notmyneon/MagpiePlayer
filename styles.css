@@ -20,6 +20,7 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .magpie-logo{width:60px;height:50px;object-fit:contain;flex:none;border-radius:9px}
 .card-brand{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
 .card-brand .eyebrow{font-size:.84rem}
+.player-card .card-brand .eyebrow{font-size:clamp(1.4rem,2.1vw,1.8rem);line-height:1.1;letter-spacing:.08em}
 .timeline-heading,.team-title-block,.roster-card-title,.team-brand,.roster-brand,.compare-player-title{display:flex;align-items:center;gap:12px;min-width:0}
 .timeline-heading h2,.team-title-block h2,.roster-card-title h2{line-height:1.12}
 .timeline-heading .magpie-logo{width:58px;height:48px}
