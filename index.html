@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <div class="app-shell">
@@ -138,8 +138,10 @@
           <label>Season<select id="rosterSeason"></select></label>
           <label>Team filter<select id="rosterTeam"><option value="">All teams</option></select></label>
           <label>Minimum GP<input id="rosterMinGP" type="number" min="0" value="10"></label>
-          <div class="toolbar-actions"><button class="button" id="autoTeamBtn">Load Team by TOI</button><button class="button secondary" id="autoBestBtn" title="Select the highest Magpie Scores that meet the role and minimum GP filters">Auto Fill Top Magpie Scores</button><button class="button ghost" id="clearRosterBtn">Clear</button></div>
+          <div class="toolbar-actions"><button class="button" id="autoTeamBtn">Load Team by TOI</button><button class="button ghost" id="clearRosterBtn">Clear</button></div>
         </div>
+        <div class="panel auto-fill-options"><div><div class="eyebrow">AUTO FILL</div><h3>Build by stat</h3></div><label>Stat<select id="autoFillMetric"><option value="score">Magpie Score</option><option value="hits">Hits</option><option value="blocked">Blocked Shots</option><option value="takeaways">Takeaways</option><option value="gf">Goals For</option><option value="sf">Shots For</option><option value="ga">Goals Against</option><option value="sa">Shots Against</option></select></label><label>Result<select id="autoFillDirection"><option value="best">Best</option><option value="worst">Worst</option></select></label><button class="button secondary" id="autoBestBtn">Auto Fill Lineup</button></div>
+        <p class="auto-fill-note">For goals and shots against, Best selects the lowest projected values. Auto Fill uses the main season, team filter, minimum GP and role ranges.</p>
         <div class="panel roster-card-options"><label>Card title<input id="rosterCustomTitle" type="text" maxlength="70" value="Projected Lineup" placeholder="Write a title for your card"></label><label>Card team logo<select id="rosterCardTeamLogo"><option value="">No team logo</option></select></label></div>
         <p class="projection-note">HIT, BLK and TKA use each player’s selected season and assigned minutes. GF, SF, GA and SA count shared on-ice events once. Team Magpie is the ice-time-weighted average of the selected players’ scores.</p>
 
@@ -150,7 +152,7 @@
           </div>
 
           <article class="roster-card card-surface">
-            <div class="roster-card-head"><div class="roster-card-title"><img id="rosterCardLogo" class="team-card-logo hidden" alt=""><div><div class="eyebrow" id="rosterCardSeason">—</div><h2 id="rosterCardTitle">Projected Lineup</h2></div></div><div class="roster-brand"><img class="magpie-logo" alt="Magpie Hockey logo"><div class="score-orb"><small>TEAM MAGPIE</small><strong id="rosterScore">0.00</strong><span>TOI-weighted</span></div></div></div>
+            <div class="roster-card-head"><div class="roster-card-title"><img id="rosterCardLogo" class="team-card-logo hidden" alt=""><div><div class="eyebrow" id="rosterCardSeason">—</div><h2 id="rosterCardTitle">Projected Lineup</h2></div></div><div class="roster-brand"><img class="magpie-logo" alt="Magpie Hockey logo"><div class="score-orb"><small>TEAM MAGPIE</small><strong id="rosterScore">0.00</strong></div></div></div>
             <div class="roster-kpis">
               <div><span>HIT</span><strong id="rosterHits">0.0</strong></div><div><span>BLK</span><strong id="rosterBlocks">0.0</strong></div><div><span>TKA</span><strong id="rosterTakeaways">0.0</strong></div><div><span>GF</span><strong id="rosterGF">0.0</strong></div><div><span>SF</span><strong id="rosterSF">0.0</strong></div><div><span>GA</span><strong id="rosterGA">0.0</strong></div><div><span>SA</span><strong id="rosterSA">0.0</strong></div>
             </div>
@@ -162,6 +164,6 @@
   </div>
 
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
