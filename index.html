@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
   <div class="app-shell">
@@ -50,6 +50,7 @@
         <div class="player-layout">
           <article class="player-card card-surface" id="playerCard">
             <div class="card-kicker"><span id="playerCardSeason">—</span><span id="playerCardTeam">—</span></div>
+            <div class="card-brand"><span class="eyebrow">MAGPIE SCORE</span><img class="magpie-logo" alt="Magpie Hockey logo"></div>
             <div class="player-card-head">
               <div class="player-title-wrap">
                 <img id="playerTeamLogo" class="player-team-logo hidden" alt="">
@@ -64,16 +65,16 @@
               <div class="stat-box focus"><span>Hits</span><strong id="playerHits">—</strong><small id="playerHitsRank">—</small></div>
               <div class="stat-box focus"><span>Blocks</span><strong id="playerBlocks">—</strong><small id="playerBlocksRank">—</small></div>
               <div class="stat-box focus"><span>Takeaways</span><strong id="playerTakeaways">—</strong><small id="playerTakeawaysRank">—</small></div>
-              <div class="stat-box"><span>Goals For</span><strong id="playerGF">—</strong><small>On ice</small></div>
-              <div class="stat-box"><span>Shots For</span><strong id="playerSF">—</strong><small>On ice</small></div>
-              <div class="stat-box"><span>Goals Against</span><strong id="playerGA">—</strong><small>On ice</small></div>
-              <div class="stat-box"><span>Shots Against</span><strong id="playerSA">—</strong><small>On ice</small></div>
               <div class="stat-box"><span>Avg TOI</span><strong id="playerTOI">—</strong><small>per game</small></div>
+              <div class="stat-box"><span>Goals For</span><strong id="playerGF">—</strong><small>On ice</small></div>
+              <div class="stat-box"><span>Goals Against</span><strong id="playerGA">—</strong><small>On ice</small></div>
+              <div class="stat-box"><span>Shots For</span><strong id="playerSF">—</strong><small>On ice</small></div>
+              <div class="stat-box"><span>Shots Against</span><strong id="playerSA">—</strong><small>On ice</small></div>
             </div>
           </article>
 
           <article class="timeline-card card-surface">
-            <div class="section-title-row"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="timelineTitle">Select a player</h2></div><div class="legend"><span><i class="player-line"></i>Player</span><span><i class="avg-line"></i>Position avg.</span></div></div>
+            <div class="section-title-row"><div class="timeline-heading"><img class="magpie-logo" alt="Magpie Hockey logo"><img id="timelineTeamLogo" class="player-team-logo hidden" alt=""><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="timelineTitle">Select a player</h2></div></div><div class="legend"><span><i class="player-line"></i>Player</span><span><i class="avg-line"></i>Position avg.</span></div></div>
             <div class="chart-wrap"><svg id="timelineChart" viewBox="0 0 1000 420" preserveAspectRatio="none" role="img" aria-label="Player timeline"></svg></div>
             <div class="timeline-summary" id="timelineSummary"></div>
           </article>
@@ -89,10 +90,12 @@
           <div class="vs-badge">VS</div>
           <div class="panel compare-picker"><h3>Player Two</h3><label>Player<select id="comparePlayerB"></select></label><label>Season<select id="compareSeasonB"></select></label></div>
         </div>
+        <div class="compare-timeline-controls panel"><label class="check-control"><input id="showCompareTimeline" type="checkbox" checked><span>Show career timeline</span></label><label>Timeline stat<select id="compareTimelineMetric"><option value="score">Magpie Score</option><option value="hits">Hits</option><option value="blocked">Blocked Shots</option><option value="takeaways">Takeaways</option></select></label></div>
         <article class="comparison-card card-surface">
-          <div class="comparison-head"><div id="compareNameA">Player One</div><div class="comparison-title">PLAYER COMPARISON</div><div id="compareNameB">Player Two</div></div>
+          <div class="comparison-head"><div class="compare-player-title"><img id="compareLogoA" class="player-team-logo hidden" alt=""><span id="compareNameA">Player One</span></div><div class="comparison-title"><img class="magpie-logo" alt="Magpie Hockey logo"><span>MAGPIE SCORE<br>PLAYER COMPARISON</span></div><div class="compare-player-title right"><span id="compareNameB">Player Two</span><img id="compareLogoB" class="player-team-logo hidden" alt=""></div></div>
           <div class="comparison-body" id="comparisonBody"></div>
         </article>
+        <article class="comparison-timeline card-surface" id="compareTimelineCard"><div class="section-title-row"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="compareTimelineTitle">Head to head</h2></div><div class="compare-legend"><span><i class="compare-line-a"></i><b id="compareLegendA">Player One</b></span><span><i class="compare-line-b"></i><b id="compareLegendB">Player Two</b></span></div></div><div class="chart-wrap"><svg id="compareTimelineChart" viewBox="0 0 1000 330" preserveAspectRatio="none" role="img" aria-label="Two player career timeline"></svg></div></article>
       </section>
 
       <section class="view" id="view-teams" data-view-panel="teams">
@@ -120,8 +123,8 @@
           </aside>
 
           <article class="team-card card-surface">
-            <div class="team-card-head"><div><div class="eyebrow" id="teamCardSeason">—</div><h2 id="teamCardName">Select a team</h2><p id="teamCardSub">—</p></div><div class="team-summary"><span>Team Avg.</span><strong id="teamAvgScore">—</strong><small>Magpie Score</small></div></div>
-            <div class="team-table-head"><span>#</span><span>Player</span><span>Pos</span><span>GP</span><span>HIT</span><span>BLK</span><span>TKA</span><span>GF</span><span>SF</span><span>Magpie</span></div>
+            <div class="team-card-head"><div class="team-title-block"><img id="teamCardLogo" class="team-card-logo hidden" alt=""><div><div class="eyebrow">MAGPIE SCORE • TEAM CARD</div><h2 id="teamCardName">Select a team</h2><p id="teamCardSub">—</p></div></div><div class="team-brand"><img class="magpie-logo" alt="Magpie Hockey logo"><div class="team-summary"><span>Team Avg.</span><strong id="teamAvgScore">—</strong><small>Magpie Score</small></div></div></div>
+            <div class="team-table-head"><span>#</span><span>Player</span><span>Pos</span><span>GP</span><span>HIT</span><span>BLK</span><span>TKA</span><span>Magpie</span></div>
             <div class="team-table" id="teamTable"></div>
           </article>
         </div>
@@ -129,7 +132,7 @@
 
       <section class="view" id="view-roster" data-view-panel="roster">
         <div class="page-head">
-          <div><div class="eyebrow">ROSTER BUILDER</div><h1>Build a complete <span>18-skater lineup</span></h1><p>Player pool TOI controls eligibility. Assigned role TOI controls the projection. A complete lineup is normalized to 300 skater-minutes.</p></div>
+          <div><div class="eyebrow">ROSTER BUILDER</div><h1>Build a complete <span>18-skater lineup</span></h1><p>Player pool TOI controls eligibility. Role minutes determine each player’s projected contribution to a full game.</p></div>
         </div>
         <div class="panel roster-toolbar">
           <label>Season<select id="rosterSeason"></select></label>
@@ -137,6 +140,7 @@
           <label>Minimum GP<input id="rosterMinGP" type="number" min="0" value="10"></label>
           <div class="toolbar-actions"><button class="button" id="autoTeamBtn">Load Team by TOI</button><button class="button secondary" id="autoBestBtn">Auto Fill Best Eligible</button><button class="button ghost" id="clearRosterBtn">Clear</button></div>
         </div>
+        <div class="panel roster-card-options"><label>Card title<input id="rosterCustomTitle" type="text" maxlength="70" value="Projected Lineup" placeholder="Write a title for your card"></label><label>Card team logo<select id="rosterCardTeamLogo"><option value="">No team logo</option></select></label></div>
 
         <div class="roster-layout">
           <div class="roster-builder-left">
@@ -145,10 +149,11 @@
           </div>
 
           <article class="roster-card card-surface">
-            <div class="roster-card-head"><div><div class="eyebrow" id="rosterCardSeason">—</div><h2>Projected Lineup</h2><p id="rosterCardSub">Select players to begin</p></div><div class="score-orb"><small>PROJECTED</small><strong id="rosterScore">0.00</strong><span>Magpie / game</span></div></div>
+            <div class="roster-card-head"><div class="roster-card-title"><img id="rosterCardLogo" class="team-card-logo hidden" alt=""><div><div class="eyebrow" id="rosterCardSeason">—</div><h2 id="rosterCardTitle">Projected Lineup</h2><p id="rosterCardSub">Select players to begin</p></div></div><div class="roster-brand"><img class="magpie-logo" alt="Magpie Hockey logo"><div class="score-orb"><small>PROJECTED</small><strong id="rosterScore">0.00</strong><span>Magpie / game</span></div></div></div>
             <div class="roster-kpis">
               <div><span>HIT</span><strong id="rosterHits">0.0</strong></div><div><span>BLK</span><strong id="rosterBlocks">0.0</strong></div><div><span>TKA</span><strong id="rosterTakeaways">0.0</strong></div><div><span>GF</span><strong id="rosterGF">0.0</strong></div><div><span>SF</span><strong id="rosterSF">0.0</strong></div><div><span>GA</span><strong id="rosterGA">0.0</strong></div><div><span>SA</span><strong id="rosterSA">0.0</strong></div>
             </div>
+            <p class="projection-note">HIT, BLK and TKA are projected individual events per game. GF, SF, GA and SA are team on-ice estimates, with shared events counted once. Magpie is weighted by each skater’s projected ice time.</p>
             <div class="roster-lines" id="rosterCardLines"></div>
           </article>
         </div>
@@ -157,6 +162,6 @@
   </div>
 
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
