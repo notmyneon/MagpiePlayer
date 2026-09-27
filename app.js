@@ -12,7 +12,7 @@ const teamNames = {ANA:'Anaheim Ducks',ARI:'Arizona Coyotes',ATL:'Atlanta Thrash
 
 const state = {
   rawCore: [], rows: [], byKey: new Map(), byPlayer: new Map(), seasons: [], teamsBySeason: new Map(),
-  fullSeasonCache: new Map(), fullManifest: null, teamAddedKey:'', teamRemoved:new Set(), rosterSelected:{}, rosterSlotSeasons:{},
+  fullSeasonCache: new Map(), fullManifest: null, teamAddedKey:'', teamRemoved:new Set(), rosterSelected:{}, rosterSlotSeasons:{}, rosterRookies:{},
   roleConfig:null, showPlayerLogo:true
 };
 
@@ -116,7 +116,7 @@ function bindEvents(){
   $('comparePlayerA').addEventListener('change',()=>{syncCompareSeasons('A');renderCompare()});$('comparePlayerB').addEventListener('change',()=>{syncCompareSeasons('B');renderCompare()});$('compareSeasonA').addEventListener('change',renderCompare);$('compareSeasonB').addEventListener('change',renderCompare);
   $('showCompareTimeline').addEventListener('change',renderCompareTimeline);$('compareTimelineMetric').addEventListener('change',renderCompareTimeline);
   $('teamSeason').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();syncTeamList();renderTeamCard()});$('teamSelect').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});['teamMinGP','teamPosition'].forEach(id=>$(id).addEventListener('input',renderTeamCard));['teamHighlightA','teamHighlightB'].forEach(id=>$(id).addEventListener('change',renderTeamTable));$('teamAddSearch').addEventListener('input',renderTeamAdjusters);$('teamRemoveSearch').addEventListener('input',renderTeamAdjusters);$('resetTeamChanges').addEventListener('click',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});
-  $('rosterSeason').addEventListener('change',()=>{state.rosterSelected={};state.rosterSlotSeasons={};syncRosterTeamList();buildLineupEditor();renderRosterCard()});$('rosterTeam').addEventListener('change',()=>{buildLineupEditor();renderRosterCard()});$('rosterMinGP').addEventListener('input',()=>{buildLineupEditor();renderRosterCard()});$('clearRosterBtn').addEventListener('click',()=>{state.rosterSelected={};state.rosterSlotSeasons={};buildLineupEditor();renderRosterCard()});$('autoTeamBtn').addEventListener('click',autoLoadTeam);$('autoBestBtn').addEventListener('click',autoFillLineup);$('resetRoleBtn').addEventListener('click',()=>{state.roleConfig=defaultRoleConfig();buildRoleSettings();buildLineupEditor();renderRosterCard()});
+  $('rosterSeason').addEventListener('change',()=>{state.rosterSelected={};state.rosterSlotSeasons={};syncRosterTeamList();buildLineupEditor();renderRosterCard()});$('rosterTeam').addEventListener('change',()=>{buildLineupEditor();renderRosterCard()});$('rosterMinGP').addEventListener('input',()=>{buildLineupEditor();renderRosterCard()});$('clearRosterBtn').addEventListener('click',()=>{state.rosterSelected={};state.rosterSlotSeasons={};state.rosterRookies={};buildLineupEditor();renderRosterCard()});$('autoTeamBtn').addEventListener('click',autoLoadTeam);$('autoBestBtn').addEventListener('click',autoFillLineup);$('resetRoleBtn').addEventListener('click',()=>{state.roleConfig=defaultRoleConfig();buildRoleSettings();buildLineupEditor();renderRosterCard()});
   $('rosterCustomTitle').addEventListener('input',()=>{try{localStorage.setItem('magpieRosterTitle',$('rosterCustomTitle').value)}catch(_){}renderRosterCard()});
   $('rosterCardTeamLogo').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterLogo',$('rosterCardTeamLogo').value)}catch(_){}renderRosterCard()});
   window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['players','compare','teams','roster'].includes(v))switchView(v,false)});
@@ -172,14 +172,68 @@ function syncRosterTeamList(){const s=$('rosterSeason').value,teams=state.teamsB
 function slotId(roleKey,i){return `${roleKey}-${i}`}
 function rosterCandidates(role,season=$('rosterSeason').value){const t=$('rosterTeam').value,minGP=num($('rosterMinGP').value),c=state.roleConfig[role.key];return state.rows.filter(r=>r.season===season&&r.position===role.position&&r.gp>=minGP&&(!t||r.team.split(',').map(clean).includes(t))&&r.avgtoi>=c.min&&r.avgtoi<=c.max).sort((a,b)=>b.score-a.score||b.avgtoi-a.avgtoi)}
 function slotSeason(id){return state.rosterSlotSeasons[id]||$('rosterSeason').value}
-function buildLineupEditor(){if(!state.roleConfig)state.roleConfig=defaultRoleConfig();$('lineupEditor').innerHTML=roles.map(role=>{const slots=Array.from({length:role.count},(_,i)=>{const id=slotId(role.key,i),season=slotSeason(id),cand=rosterCandidates(role,season),cur=state.rosterSelected[id]||'';if(cur&&!cand.some(r=>r.key===cur))state.rosterSelected[id]='';return `<div class="slot"><div class="slot-fields"><label>${role.position==='F'?'Forward':'Defence'} ${i+1}<select data-slot="${id}" data-role="${role.key}"><option value="">Select player</option>${cand.map(r=>`<option value="${esc(r.key)}" ${r.key===cur?'selected':''}>${esc(r.player)} • ${fmt(r.avgtoi,1)} TOI • ${fmt(r.score)}</option>`).join('')}</select></label><label>Season<select data-slot-season="${id}">${state.seasons.map(s=>`<option value="${s}" ${s===season?'selected':''}>${displaySeason(s)}</option>`).join('')}</select></label></div><div class="slot-meta">${cand.length} eligible • ${fmt(state.roleConfig[role.key].toi,1)} assigned TOI</div></div>`}).join('');return `<div class="line-group"><div class="line-group-title"><strong>${role.label}</strong><span>${state.roleConfig[role.key].min}–${Number.isFinite(state.roleConfig[role.key].max)?state.roleConfig[role.key].max:'∞'} pool TOI</span></div><div class="slot-grid ${role.position==='D'?'defence':''}">${slots}</div></div>`}).join('');$('lineupEditor').querySelectorAll('select[data-slot]').forEach(s=>s.addEventListener('change',()=>{state.rosterSelected[s.dataset.slot]=s.value;enforceUnique(s.dataset.slot,s.value);buildLineupEditor();renderRosterCard()}));$('lineupEditor').querySelectorAll('select[data-slot-season]').forEach(s=>s.addEventListener('change',()=>{const id=s.dataset.slotSeason,old=state.byKey.get(state.rosterSelected[id]);state.rosterSlotSeasons[id]=s.value;const role=roles.find(r=>id.startsWith(r.key+'-'));const replacement=old&&rosterCandidates(role,s.value).find(r=>r.player===old.player);state.rosterSelected[id]=replacement?.key||'';enforceUnique(id,state.rosterSelected[id]);buildLineupEditor();renderRosterCard()}));updateSelectedCount()}
+function buildLineupEditor(){
+  if(!state.roleConfig)state.roleConfig=defaultRoleConfig();
+  $('lineupEditor').innerHTML=roles.map(role=>{
+    const slots=Array.from({length:role.count},(_,i)=>{
+      const id=slotId(role.key,i),season=slotSeason(id),cand=rosterCandidates(role,season),rookie=Object.hasOwn(state.rosterRookies,id),cur=state.rosterSelected[id]||'';
+      if(cur&&!cand.some(r=>r.key===cur))state.rosterSelected[id]='';
+      const detail=rookie
+        ? `<div class="rookie-entry"><label>Rookie name<input data-rookie="${id}" type="text" maxlength="60" value="${esc(state.rosterRookies[id])}" placeholder="Enter name" autocomplete="off"></label><button type="button" class="button ghost rookie-remove" data-remove-rookie="${id}">Remove</button></div>`
+        : `<label>Season<select data-slot-season="${id}">${state.seasons.map(s=>`<option value="${s}" ${s===season?'selected':''}>${displaySeason(s)}</option>`).join('')}</select></label>`;
+      return `<div class="slot"><div class="slot-fields"><label>${role.position==='F'?'Forward':'Defence'} ${i+1}<select data-slot="${id}" data-role="${role.key}"><option value="">Select player</option><option value="__rookie__" ${rookie?'selected':''}>+ Add rookie</option>${cand.map(r=>`<option value="${esc(r.key)}" ${r.key===cur?'selected':''}>${esc(r.player)} • ${fmt(r.avgtoi,1)} TOI • ${fmt(r.score)}</option>`).join('')}</select></label>${detail}</div><div class="slot-meta">${rookie?'Rookie • no projected stats':`${cand.length} eligible • ${fmt(state.roleConfig[role.key].toi,1)} assigned TOI`}</div></div>`;
+    }).join('');
+    return `<div class="line-group"><div class="line-group-title"><strong>${role.label}</strong><span>${state.roleConfig[role.key].min}–${Number.isFinite(state.roleConfig[role.key].max)?state.roleConfig[role.key].max:'∞'} pool TOI</span></div><div class="slot-grid ${role.position==='D'?'defence':''}">${slots}</div></div>`;
+  }).join('');
+  $('lineupEditor').querySelectorAll('select[data-slot]').forEach(s=>s.addEventListener('change',()=>{
+    const id=s.dataset.slot,rookie=s.value==='__rookie__';
+    if(rookie){state.rosterRookies[id]='';state.rosterSelected[id]=''}
+    else{delete state.rosterRookies[id];state.rosterSelected[id]=s.value;enforceUnique(id,s.value)}
+    buildLineupEditor();renderRosterCard();
+    if(rookie)$('lineupEditor').querySelector(`[data-rookie="${id}"]`)?.focus();
+  }));
+  $('lineupEditor').querySelectorAll('input[data-rookie]').forEach(input=>input.addEventListener('input',()=>{
+    state.rosterRookies[input.dataset.rookie]=input.value;
+    renderRosterCard();
+  }));
+  $('lineupEditor').querySelectorAll('button[data-remove-rookie]').forEach(button=>button.addEventListener('click',()=>{
+    delete state.rosterRookies[button.dataset.removeRookie];buildLineupEditor();renderRosterCard();
+  }));
+  $('lineupEditor').querySelectorAll('select[data-slot-season]').forEach(s=>s.addEventListener('change',()=>{
+    const id=s.dataset.slotSeason,old=state.byKey.get(state.rosterSelected[id]);
+    state.rosterSlotSeasons[id]=s.value;
+    const role=roles.find(r=>id.startsWith(r.key+'-'));
+    const replacement=old&&rosterCandidates(role,s.value).find(r=>r.player===old.player);
+    state.rosterSelected[id]=replacement?.key||'';
+    enforceUnique(id,state.rosterSelected[id]);buildLineupEditor();renderRosterCard();
+  }));
+  updateSelectedCount();
+}
 function enforceUnique(changed,key){const chosen=state.byKey.get(key);if(!chosen)return;for(const [slot,v] of Object.entries(state.rosterSelected))if(slot!==changed&&state.byKey.get(v)?.player===chosen.player)state.rosterSelected[slot]=''}
-function updateSelectedCount(){const n=Object.values(state.rosterSelected).filter(Boolean).length;$('selectedCount').textContent=`${n} / 18`}
+function updateSelectedCount(){const n=Object.values(state.rosterSelected).filter(Boolean).length,rookies=Object.keys(state.rosterRookies).length;$('selectedCount').textContent=`${n} / 18 with stats${rookies?` • ${rookies} rookie${rookies===1?'':'s'}`:''}`}
 function getSelectedEntries(){const out=[];for(const role of roles)for(let i=0;i<role.count;i++){const id=slotId(role.key,i),key=state.rosterSelected[id],row=state.byKey.get(key);if(row)out.push({slot:id,role,row})}return out}
 function projectedPlayer(e){const r=e.row,gp=r.gp||1,actual=r.avgtoi||1,assigned=state.roleConfig[e.role.key].toi,k=assigned/actual;return {assigned,hits:(r.hits/gp)*k,blocked:(r.blocked/gp)*k,takeaways:(r.takeaways/gp)*k,minors:(r.minors/gp)*k,ga:(r.goalsAgainst/gp)*k,sa:(r.shotsAgainst/gp)*k,gf:(r.goalsFor/gp)*k,sf:(r.shotsFor/gp)*k}}
 function rosterTotals(){const entries=getSelectedEntries(),t={entries,hits:0,blocked:0,takeaways:0,minors:0,ga:0,sa:0,gf:0,sf:0,assigned:0,weightedScore:0};entries.forEach(e=>{const p=projectedPlayer(e);for(const k of ['hits','blocked','takeaways','minors','ga','sa','gf','sf','assigned'])t[k]+=p[k];t.weightedScore+=e.row.score*p.assigned});t.score=t.assigned?t.weightedScore/t.assigned:0;for(const k of ['gf','sf','ga','sa'])t[k]=t.assigned?t[k]*60/t.assigned:0;return t}
-function renderRosterCard(){updateSelectedCount();const t=rosterTotals(),s=$('rosterSeason').value,mixed=t.entries.some(e=>e.row.season!==s);$('rosterCardSeason').textContent=`${displaySeason(s)}${mixed?' • MIXED SEASONS':''}`;$('rosterCardTitle').textContent=clean($('rosterCustomTitle').value)||'Projected Lineup';setTeamLogo($('rosterCardLogo'),$('rosterCardTeamLogo').value);$('rosterScore').textContent=fmt(t.score);$('rosterHits').textContent=fmt(t.hits,1);$('rosterBlocks').textContent=fmt(t.blocked,1);$('rosterTakeaways').textContent=fmt(t.takeaways,1);$('rosterGF').textContent=fmt(t.gf,1);$('rosterSF').textContent=fmt(t.sf,1);$('rosterGA').textContent=fmt(t.ga,1);$('rosterSA').textContent=fmt(t.sa,1);$('rosterCardLines').innerHTML=roles.map(role=>{const players=Array.from({length:role.count},(_,i)=>{const row=state.byKey.get(state.rosterSelected[slotId(role.key,i)]);return row?`<div class="roster-player"><strong>${esc(row.player)}</strong><small>${displaySeason(row.season)} • ${fmt(state.roleConfig[role.key].toi,1)} min • ${fmt(row.score)} Magpie</small></div>`:'<div class="roster-player"><strong>Open</strong><small>Select player</small></div>'}).join('');return `<div class="roster-line"><div class="roster-line-label">${esc(role.position==='F'?role.label.replace(' Forwards',''):role.label)}</div><div class="roster-players ${role.position==='D'?'defence':''}">${players}</div></div>`}).join('')}
-function autoLoadTeam(){const team=$('rosterTeam').value;if(!team){alert('Choose a team first.');return}state.rosterSelected={};state.rosterSlotSeasons={};const used=new Set();for(const role of roles){const cand=rosterCandidates(role).filter(r=>!used.has(r.player)).sort((a,b)=>b.avgtoi-a.avgtoi||b.score-a.score);for(let i=0;i<role.count;i++){const r=cand[i];if(r){state.rosterSelected[slotId(role.key,i)]=r.key;used.add(r.player)}}}$('rosterCardTeamLogo').value=nhlLogoTeam(team);buildLineupEditor();renderRosterCard()}
-function autoFillLineup(){const metric=$('autoFillMetric').value,direction=$('autoFillDirection').value,lowerIsBetter=metric==='ga'||metric==='sa',ascending=direction==='best'?lowerIsBetter:!lowerIsBetter;state.rosterSelected={};state.rosterSlotSeasons={};const used=new Set();for(const role of roles){const value=r=>metric==='score'?r.score:projectedPlayer({row:r,role})[metric];const cand=rosterCandidates(role).filter(r=>!used.has(r.player)).sort((a,b)=>(ascending?value(a)-value(b):value(b)-value(a))||b.gp-a.gp||a.player.localeCompare(b.player));for(let i=0;i<role.count;i++){const r=cand[i];if(r){state.rosterSelected[slotId(role.key,i)]=r.key;used.add(r.player)}}}buildLineupEditor();renderRosterCard()}
+function renderRosterCard(){
+  updateSelectedCount();
+  const t=rosterTotals(),s=$('rosterSeason').value,mixed=t.entries.some(e=>e.row.season!==s);
+  $('rosterCardSeason').textContent=`${displaySeason(s)}${mixed?' • MIXED SEASONS':''}`;
+  $('rosterCardTitle').textContent=clean($('rosterCustomTitle').value)||'Projected Lineup';
+  setTeamLogo($('rosterCardLogo'),$('rosterCardTeamLogo').value);
+  $('rosterScore').textContent=fmt(t.score);
+  $('rosterHits').textContent=fmt(t.hits,1);$('rosterBlocks').textContent=fmt(t.blocked,1);$('rosterTakeaways').textContent=fmt(t.takeaways,1);
+  $('rosterGF').textContent=fmt(t.gf,1);$('rosterSF').textContent=fmt(t.sf,1);$('rosterGA').textContent=fmt(t.ga,1);$('rosterSA').textContent=fmt(t.sa,1);
+  $('rosterCardLines').innerHTML=roles.map(role=>{
+    const players=Array.from({length:role.count},(_,i)=>{
+      const id=slotId(role.key,i),row=state.byKey.get(state.rosterSelected[id]);
+      if(row)return `<div class="roster-player"><strong>${esc(row.player)}</strong><small>${displaySeason(row.season)} • ${fmt(state.roleConfig[role.key].toi,1)} min • ${fmt(row.score)} Magpie</small></div>`;
+      if(Object.hasOwn(state.rosterRookies,id))return `<div class="roster-player rookie-player"><strong>${esc(state.rosterRookies[id])||'Rookie'}</strong><small>Rookie • No projected stats</small></div>`;
+      return '<div class="roster-player"><strong>Open</strong><small>Select player</small></div>';
+    }).join('');
+    return `<div class="roster-line"><div class="roster-line-label">${esc(role.position==='F'?role.label.replace(' Forwards',''):role.label)}</div><div class="roster-players ${role.position==='D'?'defence':''}">${players}</div></div>`;
+  }).join('');
+}
+function autoLoadTeam(){const team=$('rosterTeam').value;if(!team){alert('Choose a team first.');return}state.rosterSelected={};state.rosterSlotSeasons={};state.rosterRookies={};const used=new Set();for(const role of roles){const cand=rosterCandidates(role).filter(r=>!used.has(r.player)).sort((a,b)=>b.avgtoi-a.avgtoi||b.score-a.score);for(let i=0;i<role.count;i++){const r=cand[i];if(r){state.rosterSelected[slotId(role.key,i)]=r.key;used.add(r.player)}}}$('rosterCardTeamLogo').value=nhlLogoTeam(team);buildLineupEditor();renderRosterCard()}
+function autoFillLineup(){const metric=$('autoFillMetric').value,direction=$('autoFillDirection').value,lowerIsBetter=metric==='ga'||metric==='sa',ascending=direction==='best'?lowerIsBetter:!lowerIsBetter;state.rosterSelected={};state.rosterSlotSeasons={};state.rosterRookies={};const used=new Set();for(const role of roles){const value=r=>metric==='score'?r.score:projectedPlayer({row:r,role})[metric];const cand=rosterCandidates(role).filter(r=>!used.has(r.player)).sort((a,b)=>(ascending?value(a)-value(b):value(b)-value(a))||b.gp-a.gp||a.player.localeCompare(b.player));for(let i=0;i<role.count;i++){const r=cand[i];if(r){state.rosterSelected[slotId(role.key,i)]=r.key;used.add(r.player)}}}buildLineupEditor();renderRosterCard()}
 
 init();

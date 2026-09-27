@@ -70,6 +70,11 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .slot-fields label:nth-child(2){display:grid;grid-template-columns:auto minmax(0,105px);gap:8px;align-items:center}
 .slot-fields label:nth-child(2) select{min-height:34px;font-size:.7rem}
 .roster-player small{line-height:1.35}
+.rookie-entry{display:flex;align-items:end;gap:6px;min-width:0}
+.rookie-entry label{flex:1;min-width:0}
+.rookie-entry input{min-height:34px;padding:6px 8px;font-size:.8rem}
+.rookie-remove{min-height:34px;padding:6px 8px;font-size:.7rem;white-space:nowrap}
+.rookie-player{border-color:rgba(0,213,199,.3);background:rgba(0,213,199,.07)}
 .auto-fill-options{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,190px) 125px 170px;gap:12px;align-items:end;margin-top:12px}
 .auto-fill-options h3{margin:4px 0 5px;font-size:1.1rem}
 .auto-fill-note{color:var(--muted);font-size:.72rem;line-height:1.4;margin:8px 8px 0}
