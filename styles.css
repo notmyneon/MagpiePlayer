@@ -68,8 +68,10 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .roster-card .score-orb{flex-basis:102px;width:102px}
 .roster-card .score-orb strong{font-size:1.65rem}
 .slot-fields{display:grid;gap:6px}
-.slot-fields label:nth-child(2){display:grid;grid-template-columns:auto minmax(0,105px);gap:8px;align-items:center}
-.slot-fields label:nth-child(2) select{min-height:34px;font-size:.7rem}
+.slot-fields input[data-player-search]{min-height:36px;padding:6px 9px;font-size:.76rem;font-weight:600}
+.slot-fields>select[data-slot]{min-height:38px}
+.slot-fields .slot-season{display:grid;grid-template-columns:auto minmax(0,105px);gap:8px;align-items:center}
+.slot-fields .slot-season select{min-height:34px;font-size:.7rem}
 .roster-player small{line-height:1.35}
 .rookie-entry{display:flex;align-items:end;gap:6px;min-width:0}
 .rookie-entry label{flex:1;min-width:0}
