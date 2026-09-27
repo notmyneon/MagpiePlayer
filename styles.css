@@ -55,7 +55,8 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .compare-line-a{background:var(--teal)}.compare-line-b{background:var(--gold)}
 .chart-compare-b{stroke:var(--gold);stroke-width:4;fill:none;vector-effect:non-scaling-stroke}
 .chart-compare-dot-b{fill:var(--gold);stroke:#061112;stroke-width:3;vector-effect:non-scaling-stroke}
-.roster-card-options{display:grid;grid-template-columns:minmax(220px,1fr) minmax(200px,1fr);gap:12px;margin-top:12px}
+.roster-card-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:760px){.roster-card-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .projection-note{margin:9px 8px 0;color:var(--muted);font-size:.72rem;line-height:1.45}
 .compare-timeline-controls{max-width:1060px;margin:16px auto 0;justify-content:flex-start}
 .roster-card-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}

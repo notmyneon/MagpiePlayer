@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
   <div class="app-shell">
@@ -142,7 +142,7 @@
         </div>
         <div class="panel auto-fill-options"><div><div class="eyebrow">AUTO FILL</div><h3>Build by stat</h3></div><label>Stat<select id="autoFillMetric"><option value="score">Magpie Score</option><option value="hits">Hits</option><option value="blocked">Blocked Shots</option><option value="takeaways">Takeaways</option><option value="gf">Goals For</option><option value="sf">Shots For</option><option value="ga">Goals Against</option><option value="sa">Shots Against</option></select></label><label>Result<select id="autoFillDirection"><option value="best">Best</option><option value="worst">Worst</option></select></label><button class="button secondary" id="autoBestBtn">Auto Fill Lineup</button></div>
         <p class="auto-fill-note">For goals and shots against, Best selects the lowest projected values. Auto Fill uses the main season, team filter, minimum GP and role ranges.</p>
-        <div class="panel roster-card-options"><label>Card title<input id="rosterCustomTitle" type="text" maxlength="70" value="Projected Lineup" placeholder="Write a title for your card"></label><label>Card team logo<select id="rosterCardTeamLogo"><option value="">No team logo</option></select></label></div>
+        <div class="panel roster-card-options"><label>Card title<input id="rosterCustomTitle" type="text" maxlength="70" value="Projected Lineup" placeholder="Write a title for your card"></label><label>Card subtitle<input id="rosterCustomSubtitle" type="text" maxlength="70" placeholder="e.g. 2026-27 Season Preview"></label><label>Card team logo<select id="rosterCardTeamLogo"><option value="">No team logo</option></select></label></div>
         <p class="projection-note">HIT, BLK and TKA use each player’s selected season and assigned minutes. GF, SF, GA and SA count shared on-ice events once. Team Magpie is the ice-time-weighted average of the selected players’ scores.</p>
 
         <div class="roster-layout">
@@ -164,6 +164,6 @@
   </div>
 
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

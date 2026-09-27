@@ -104,7 +104,7 @@ function populateAllControls(){
   syncTeamList(); syncRosterTeamList();
   const logoTeams=[...new Set([...state.teamsBySeason.values()].flat().map(nhlLogoTeam))].filter(Boolean).sort((a,b)=>teamName(a).localeCompare(teamName(b)));
   setOptions($('rosterCardTeamLogo'),'<option value="">No team logo</option>'+logoTeams.map(t=>opt(t,teamName(t))).join(''),'');
-  try{$('rosterCustomTitle').value=localStorage.getItem('magpieRosterTitle')||'Projected Lineup';$('rosterCardTeamLogo').value=localStorage.getItem('magpieRosterLogo')||''}catch(_){}
+  try{$('rosterCustomTitle').value=localStorage.getItem('magpieRosterTitle')||'Projected Lineup';$('rosterCustomSubtitle').value=localStorage.getItem('magpieRosterSubtitle')||'';$('rosterCardTeamLogo').value=localStorage.getItem('magpieRosterLogo')||''}catch(_){}
   applyMagpieLogos();buildRoleSettings(); buildLineupEditor();
 }
 
@@ -118,6 +118,7 @@ function bindEvents(){
   $('teamSeason').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();syncTeamList();renderTeamCard()});$('teamSelect').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});['teamMinGP','teamPosition'].forEach(id=>$(id).addEventListener('input',renderTeamCard));['teamHighlightA','teamHighlightB'].forEach(id=>$(id).addEventListener('change',renderTeamTable));$('teamAddSearch').addEventListener('input',renderTeamAdjusters);$('teamRemoveSearch').addEventListener('input',renderTeamAdjusters);$('resetTeamChanges').addEventListener('click',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});
   $('rosterSeason').addEventListener('change',()=>{state.rosterSelected={};state.rosterSlotSeasons={};syncRosterTeamList();buildLineupEditor();renderRosterCard()});$('rosterTeam').addEventListener('change',()=>{buildLineupEditor();renderRosterCard()});$('rosterMinGP').addEventListener('input',()=>{buildLineupEditor();renderRosterCard()});$('clearRosterBtn').addEventListener('click',()=>{state.rosterSelected={};state.rosterSlotSeasons={};state.rosterRookies={};buildLineupEditor();renderRosterCard()});$('autoTeamBtn').addEventListener('click',autoLoadTeam);$('autoBestBtn').addEventListener('click',autoFillLineup);$('resetRoleBtn').addEventListener('click',()=>{state.roleConfig=defaultRoleConfig();buildRoleSettings();buildLineupEditor();renderRosterCard()});
   $('rosterCustomTitle').addEventListener('input',()=>{try{localStorage.setItem('magpieRosterTitle',$('rosterCustomTitle').value)}catch(_){}renderRosterCard()});
+  $('rosterCustomSubtitle').addEventListener('input',()=>{try{localStorage.setItem('magpieRosterSubtitle',$('rosterCustomSubtitle').value)}catch(_){}renderRosterCard()});
   $('rosterCardTeamLogo').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterLogo',$('rosterCardTeamLogo').value)}catch(_){}renderRosterCard()});
   window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['players','compare','teams','roster'].includes(v))switchView(v,false)});
 }
@@ -216,8 +217,8 @@ function projectedPlayer(e){const r=e.row,gp=r.gp||1,actual=r.avgtoi||1,assigned
 function rosterTotals(){const entries=getSelectedEntries(),t={entries,hits:0,blocked:0,takeaways:0,minors:0,ga:0,sa:0,gf:0,sf:0,assigned:0,weightedScore:0};entries.forEach(e=>{const p=projectedPlayer(e);for(const k of ['hits','blocked','takeaways','minors','ga','sa','gf','sf','assigned'])t[k]+=p[k];t.weightedScore+=e.row.score*p.assigned});t.score=t.assigned?t.weightedScore/t.assigned:0;for(const k of ['gf','sf','ga','sa'])t[k]=t.assigned?t[k]*60/t.assigned:0;return t}
 function renderRosterCard(){
   updateSelectedCount();
-  const t=rosterTotals(),s=$('rosterSeason').value,mixed=t.entries.some(e=>e.row.season!==s);
-  $('rosterCardSeason').textContent=`${displaySeason(s)}${mixed?' • MIXED SEASONS':''}`;
+  const t=rosterTotals(),s=$('rosterSeason').value;
+  $('rosterCardSeason').textContent=clean($('rosterCustomSubtitle').value)||displaySeason(s);
   $('rosterCardTitle').textContent=clean($('rosterCustomTitle').value)||'Projected Lineup';
   setTeamLogo($('rosterCardLogo'),$('rosterCardTeamLogo').value);
   $('rosterScore').textContent=fmt(t.score);
