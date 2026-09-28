@@ -265,6 +265,17 @@ async function downloadCard(button){
   try{
     if(!window.htmlToImage)throw new Error('Image renderer unavailable');
     const copy=card.cloneNode(true);copy.classList.add('export-card');copy.style.width='900px';copy.style.maxWidth='none';copy.style.margin='0';copy.style.position='relative';copy.style.top='auto';
+    // SVG presentation styles can disappear when the chart is serialized into an image.
+    // Resolve them against the live chart and carry the values onto its exported copy.
+    const svgParts=card.querySelectorAll('svg line, svg path, svg circle, svg text');
+    const svgCopies=copy.querySelectorAll('svg line, svg path, svg circle, svg text');
+    svgParts.forEach((part,i)=>{
+      const computed=getComputedStyle(part),target=svgCopies[i];
+      for(const property of ['fill','stroke','stroke-width','stroke-dasharray','vector-effect','font-size','font-family','font-weight']){
+        const value=computed.getPropertyValue(property);
+        if(value)target.style.setProperty(property,value);
+      }
+    });
     stage.append(copy);document.body.append(stage);
     await document.fonts.ready;
     await Promise.all([...copy.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));
