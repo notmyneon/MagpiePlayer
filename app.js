@@ -232,7 +232,6 @@ function renderRosterCard(){
   const t=rosterTotals(),s=$('rosterSeason').value;
   const preview=$('rosterStatMode').value==='blend';
   $('rosterStatDescription').textContent=preview?'Goals use 50% actual + 50% expected goals. Shots use 50% actual + 50% expected shots on goal (xOnGoal). All four adjust for assigned minutes.':'Uses actual goals and shots from each player’s selected season, adjusted for assigned minutes.';
-  $('rosterModeBadge').textContent=preview?'GF / GA / SF / SA · 50% ACTUAL + 50% EXPECTED':'GF / GA / SF / SA · HISTORICAL RESULTS';
   $('rosterCardSeason').textContent=clean($('rosterCustomSubtitle').value)||displaySeason(s);
   $('rosterCardTitle').textContent=clean($('rosterCustomTitle').value)||'Projected Lineup';
   setTeamLogo($('rosterCardLogo'),$('rosterCardTeamLogo').value);
