@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
   <div class="app-shell">
@@ -97,7 +97,7 @@
           <div class="comparison-head"><div class="compare-player-title"><img id="compareLogoA" class="player-team-logo hidden" alt=""><span id="compareNameA">Player One</span></div><div class="comparison-title"><img class="magpie-logo" alt="Magpie Hockey logo"><span>MAGPIE SCORE<br>PLAYER COMPARISON</span></div><div class="compare-player-title right"><span id="compareNameB">Player Two</span><img id="compareLogoB" class="player-team-logo hidden" alt=""></div></div>
           <div class="comparison-body" id="comparisonBody"></div>
         </article>
-        <article class="comparison-timeline card-surface" id="compareTimelineCard"><div class="section-title-row"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="compareTimelineTitle">Head to head</h2></div><div class="compare-legend"><span><i class="compare-line-a"></i><b id="compareLegendA">Player One</b></span><span><i class="compare-line-b"></i><b id="compareLegendB">Player Two</b></span></div></div><div class="chart-wrap"><svg id="compareTimelineChart" viewBox="0 0 1000 330" preserveAspectRatio="none" role="img" aria-label="Two player career timeline"></svg></div></article>
+        <article class="comparison-timeline card-surface" id="compareTimelineCard"><div class="section-title-row"><div class="compare-timeline-heading"><img class="magpie-logo" alt="Magpie Hockey logo"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="compareTimelineTitle">Head to head</h2></div></div><div class="compare-legend"><span><img id="compareTimelineLogoA" class="player-team-logo hidden" alt=""><i class="compare-line-a"></i><b id="compareLegendA">Player One</b></span><span><img id="compareTimelineLogoB" class="player-team-logo hidden" alt=""><i class="compare-line-b"></i><b id="compareLegendB">Player Two</b></span></div></div><div class="chart-wrap"><svg id="compareTimelineChart" viewBox="0 0 1000 330" preserveAspectRatio="none" role="img" aria-label="Two player career timeline"></svg></div></article>
       </section>
 
       <section class="view" id="view-teams" data-view-panel="teams">
@@ -171,6 +171,6 @@
   <div class="download-status" id="downloadStatus" role="status" aria-live="polite"></div>
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
   <script src="assets/vendor/html-to-image-1.11.13.js"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

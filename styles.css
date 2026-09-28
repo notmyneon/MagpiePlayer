@@ -51,7 +51,11 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 .comparison-timeline h2{margin:4px 0;font-size:1.35rem}
 .comparison-timeline .chart-wrap{height:285px}
 .compare-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.75rem;color:var(--muted)}
-.compare-legend i{display:inline-block;width:20px;height:3px;vertical-align:middle;margin-right:6px}
+.compare-timeline-heading{display:flex;align-items:center;gap:12px;min-width:0}
+.compare-timeline-heading .magpie-logo{width:56px;height:52px;flex:0 0 56px;object-fit:contain}
+.compare-legend span{display:inline-flex;align-items:center;gap:7px}
+.compare-legend .player-team-logo{width:34px;height:34px;flex:0 0 34px}
+.compare-legend i{display:inline-block;width:20px;height:3px;vertical-align:middle;flex:0 0 20px}
 .compare-line-a{background:var(--teal)}.compare-line-b{background:var(--gold)}
 .chart-compare-b{stroke:var(--gold);stroke-width:4;fill:none;vector-effect:non-scaling-stroke}
 .chart-compare-dot-b{fill:var(--gold);stroke:#061112;stroke-width:3;vector-effect:non-scaling-stroke}
@@ -113,5 +117,6 @@ label{display:grid;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;t
 @media(max-width:820px){.comparison-head{grid-template-columns:minmax(0,1fr) 90px minmax(0,1fr);font-size:.78rem}.comparison-title .magpie-logo{width:45px;height:40px}.compare-player-title .player-team-logo{width:34px;height:34px;flex-basis:34px}.comparison-card{padding:15px}.compare-row{grid-template-columns:minmax(0,1fr) 115px minmax(0,1fr);min-height:48px}.team-table-head,.team-row{grid-template-columns:34px minmax(130px,1fr) 40px 44px 52px 52px 52px 64px}.team-table-head span:nth-child(8),.team-row span:nth-child(8){display:block}}
 @media(max-width:560px){.team-title-block,.roster-card-title{align-items:flex-start}.team-card-logo{width:48px;height:48px}.team-brand,.roster-brand{align-items:flex-start}.team-brand .magpie-logo,.roster-brand .magpie-logo{width:40px;height:38px}.roster-card-options{grid-template-columns:1fr}.compare-timeline-controls{flex-wrap:wrap;justify-content:flex-start}.comparison-timeline{padding:14px}.comparison-timeline .chart-wrap{height:240px}.compare-legend{font-size:.65rem}.compare-player-title{flex-wrap:wrap;gap:4px}.compare-row{grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr)}.compare-value{font-size:.85rem;flex-wrap:wrap;gap:2px}.percentile{font-size:.52rem}.team-table-head,.team-row{grid-template-columns:26px minmax(115px,1fr) 44px 44px 44px 56px;font-size:.68rem}.team-table-head span:nth-child(3),.team-row span:nth-child(3),.team-table-head span:nth-child(4),.team-row span:nth-child(4){display:none}.team-table-head span:nth-child(7),.team-row span:nth-child(7){display:block}}
 @media(max-width:560px){.team-card{padding:12px}.team-card-head{flex-wrap:wrap}.team-brand{margin-left:auto}.team-table-head,.team-row{grid-template-columns:20px minmax(72px,1fr) repeat(3,32px) 48px;gap:4px}.team-table-head{padding:0 4px 6px;font-size:.63rem}.team-row{padding:5px 4px;font-size:.85rem}}
+@media(max-width:760px){.comparison-timeline .section-title-row{flex-wrap:wrap}.compare-legend .player-team-logo{width:28px;height:28px;flex-basis:28px}}
 @media(max-width:560px){.player-card .card-brand{gap:9px}.player-card .card-brand .magpie-logo{width:48px;height:44px}.player-card .card-brand .eyebrow{font-size:clamp(1.45rem,6.5vw,1.8rem)}}
 @media(max-width:560px){.player-card .score-orb{flex-basis:96px}.player-card .player-title-wrap{padding-top:7px}}
