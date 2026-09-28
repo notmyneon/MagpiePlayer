@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=19">
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
   <div class="app-shell">
@@ -91,6 +91,7 @@
           <div class="vs-badge">VS</div>
           <div class="panel compare-picker"><h3>Player Two</h3><label>Player<select id="comparePlayerB"></select></label><label>Season<select id="compareSeasonB"></select></label></div>
         </div>
+        <div class="compare-stat-controls"><label>Comparison card stats<select id="compareStatsMode"><option value="total">Season totals</option><option value="per60">Per 60 minutes</option></select></label><span>Per 60 converts counting stats using each player’s total ice time. Magpie Score, games played and Avg TOI stay as season values.</span></div>
         <div class="compare-timeline-controls panel"><label class="check-control"><input id="showCompareTimeline" type="checkbox" checked><span>Show career timeline</span></label><label>Timeline stat<select id="compareTimelineMetric"><option value="score">Magpie Score</option><option value="hits">Hits</option><option value="blocked">Blocked Shots</option><option value="takeaways">Takeaways</option></select></label></div>
         <div class="download-actions"><button type="button" class="button ghost" data-export-card="comparisonCard">Download comparison PNG</button><button type="button" class="button ghost" id="exportCompareTimeline" data-export-card="compareTimelineCard">Download timeline PNG</button></div>
         <article class="comparison-card card-surface" id="comparisonCard">
@@ -171,6 +172,6 @@
   <div class="download-status" id="downloadStatus" role="status" aria-live="polite"></div>
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
   <script src="assets/vendor/html-to-image-1.11.13.js"></script>
-  <script src="app.js?v=17"></script>
+  <script src="app.js?v=18"></script>
 </body>
 </html>
