@@ -42,7 +42,8 @@ function normalizeCore(r){
   return {
     season:clean(r.season),player:clean(r.player),team:clean(r.team),position:clean(r.position)==='D'?'D':'F',
     gp:num(r.gp),avgtoi:num(r.avgtoi),hits:num(r.hits),takeaways:num(r.takeaways),blocked:num(r.blocked),minors:num(r.minors),
-    shotsAgainst:num(r.shots_against),goalsAgainst:num(r.goals_against),shotsFor:num(r.shots_for),goalsFor:num(r.goals_for)
+    shotsAgainst:num(r.shots_against),goalsAgainst:num(r.goals_against),shotsFor:num(r.shots_for),goalsFor:num(r.goals_for),
+    xGoalsFor:num(r.x_goals_for),xGoalsAgainst:num(r.x_goals_against),xShotsFor:num(r.x_shots_for),xShotsAgainst:num(r.x_shots_against)
   };
 }
 
@@ -51,8 +52,8 @@ function aggregateCore(raw){
   for(const x of raw){
     const r=normalizeCore(x); if(!r.player||!r.season)continue;
     const key=`${r.player.toLowerCase()}|${r.season}|${r.position}`;
-    if(!m.has(key))m.set(key,{key,player:r.player,season:r.season,position:r.position,teams:new Set(),gp:0,totalTOI:0,hits:0,takeaways:0,blocked:0,minors:0,shotsAgainst:0,goalsAgainst:0,shotsFor:0,goalsFor:0});
-    const a=m.get(key); if(r.team)a.teams.add(r.team); a.gp+=r.gp;a.totalTOI+=r.avgtoi*r.gp;a.hits+=r.hits;a.takeaways+=r.takeaways;a.blocked+=r.blocked;a.minors+=r.minors;a.shotsAgainst+=r.shotsAgainst;a.goalsAgainst+=r.goalsAgainst;a.shotsFor+=r.shotsFor;a.goalsFor+=r.goalsFor;
+    if(!m.has(key))m.set(key,{key,player:r.player,season:r.season,position:r.position,teams:new Set(),gp:0,totalTOI:0,hits:0,takeaways:0,blocked:0,minors:0,shotsAgainst:0,goalsAgainst:0,shotsFor:0,goalsFor:0,xGoalsFor:0,xGoalsAgainst:0,xShotsFor:0,xShotsAgainst:0});
+    const a=m.get(key); if(r.team)a.teams.add(r.team); a.gp+=r.gp;a.totalTOI+=r.avgtoi*r.gp;a.hits+=r.hits;a.takeaways+=r.takeaways;a.blocked+=r.blocked;a.minors+=r.minors;a.shotsAgainst+=r.shotsAgainst;a.goalsAgainst+=r.goalsAgainst;a.shotsFor+=r.shotsFor;a.goalsFor+=r.goalsFor;a.xGoalsFor+=r.xGoalsFor;a.xGoalsAgainst+=r.xGoalsAgainst;a.xShotsFor+=r.xShotsFor;a.xShotsAgainst+=r.xShotsAgainst;
   }
   return [...m.values()].map(a=>{a.avgtoi=a.gp?a.totalTOI/a.gp:0;a.team=[...a.teams].join(', ');a.score=magpie(a);delete a.teams;return a;});
 }
@@ -104,7 +105,7 @@ function populateAllControls(){
   syncTeamList(); syncRosterTeamList();
   const logoTeams=[...new Set([...state.teamsBySeason.values()].flat().map(nhlLogoTeam))].filter(Boolean).sort((a,b)=>teamName(a).localeCompare(teamName(b)));
   setOptions($('rosterCardTeamLogo'),'<option value="">No team logo</option>'+logoTeams.map(t=>opt(t,teamName(t))).join(''),'');
-  try{$('rosterCustomTitle').value=localStorage.getItem('magpieRosterTitle')||'Projected Lineup';$('rosterCustomSubtitle').value=localStorage.getItem('magpieRosterSubtitle')||'';$('rosterCardTeamLogo').value=localStorage.getItem('magpieRosterLogo')||''}catch(_){}
+  try{$('rosterCustomTitle').value=localStorage.getItem('magpieRosterTitle')||'Projected Lineup';$('rosterCustomSubtitle').value=localStorage.getItem('magpieRosterSubtitle')||'';$('rosterCardTeamLogo').value=localStorage.getItem('magpieRosterLogo')||'';$('rosterStatMode').value=localStorage.getItem('magpieRosterStatMode')==='blend'?'blend':'actual'}catch(_){}
   applyMagpieLogos();buildRoleSettings(); buildLineupEditor();
 }
 
@@ -120,6 +121,7 @@ function bindEvents(){
   $('rosterCustomTitle').addEventListener('input',()=>{try{localStorage.setItem('magpieRosterTitle',$('rosterCustomTitle').value)}catch(_){}renderRosterCard()});
   $('rosterCustomSubtitle').addEventListener('input',()=>{try{localStorage.setItem('magpieRosterSubtitle',$('rosterCustomSubtitle').value)}catch(_){}renderRosterCard()});
   $('rosterCardTeamLogo').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterLogo',$('rosterCardTeamLogo').value)}catch(_){}renderRosterCard()});
+  $('rosterStatMode').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterStatMode',$('rosterStatMode').value)}catch(_){}renderRosterCard()});
   window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['players','compare','teams','roster'].includes(v))switchView(v,false)});
 }
 function switchView(v,setHash=true){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.viewPanel===v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(setHash)history.replaceState(null,'',`#${v}`);if(v==='players')renderPlayer();if(v==='compare')renderCompare();if(v==='teams')renderTeamCard();if(v==='roster')renderRosterCard();}
@@ -223,11 +225,14 @@ function buildLineupEditor(){
 function enforceUnique(changed,key){const chosen=state.byKey.get(key);if(!chosen)return;for(const [slot,v] of Object.entries(state.rosterSelected))if(slot!==changed&&state.byKey.get(v)?.player===chosen.player)state.rosterSelected[slot]=''}
 function updateSelectedCount(){const n=Object.values(state.rosterSelected).filter(Boolean).length,rookies=Object.keys(state.rosterRookies).length;$('selectedCount').textContent=`${n} / 18 with stats${rookies?` • ${rookies} rookie${rookies===1?'':'s'}`:''}`}
 function getSelectedEntries(){const out=[];for(const role of roles)for(let i=0;i<role.count;i++){const id=slotId(role.key,i),key=state.rosterSelected[id],row=state.byKey.get(key);if(row)out.push({slot:id,role,row})}return out}
-function projectedPlayer(e){const r=e.row,gp=r.gp||1,actual=r.avgtoi||1,assigned=state.roleConfig[e.role.key].toi,k=assigned/actual;return {assigned,hits:(r.hits/gp)*k,blocked:(r.blocked/gp)*k,takeaways:(r.takeaways/gp)*k,minors:(r.minors/gp)*k,ga:(r.goalsAgainst/gp)*k,sa:(r.shotsAgainst/gp)*k,gf:(r.goalsFor/gp)*k,sf:(r.shotsFor/gp)*k}}
+function projectedPlayer(e){const r=e.row,gp=r.gp||1,actual=r.avgtoi||1,assigned=state.roleConfig[e.role.key].toi,k=assigned/actual,blend=$('rosterStatMode').value==='blend';const value=(recorded,expected)=>((blend?(recorded+expected)/2:recorded)/gp)*k;return {assigned,hits:(r.hits/gp)*k,blocked:(r.blocked/gp)*k,takeaways:(r.takeaways/gp)*k,minors:(r.minors/gp)*k,ga:value(r.goalsAgainst,r.xGoalsAgainst),sa:value(r.shotsAgainst,r.xShotsAgainst),gf:value(r.goalsFor,r.xGoalsFor),sf:value(r.shotsFor,r.xShotsFor)}}
 function rosterTotals(){const entries=getSelectedEntries(),t={entries,hits:0,blocked:0,takeaways:0,minors:0,ga:0,sa:0,gf:0,sf:0,assigned:0,weightedScore:0};entries.forEach(e=>{const p=projectedPlayer(e);for(const k of ['hits','blocked','takeaways','minors','ga','sa','gf','sf','assigned'])t[k]+=p[k];t.weightedScore+=e.row.score*p.assigned});t.score=t.assigned?t.weightedScore/t.assigned:0;for(const k of ['gf','sf','ga','sa'])t[k]=t.assigned?t[k]*60/t.assigned:0;return t}
 function renderRosterCard(){
   updateSelectedCount();
   const t=rosterTotals(),s=$('rosterSeason').value;
+  const preview=$('rosterStatMode').value==='blend';
+  $('rosterStatDescription').textContent=preview?'Goals use 50% actual + 50% expected goals. Shots use 50% actual + 50% expected shots on goal (xOnGoal). All four adjust for assigned minutes.':'Uses actual goals and shots from each player’s selected season, adjusted for assigned minutes.';
+  $('rosterModeBadge').textContent=preview?'GF / GA / SF / SA · 50% ACTUAL + 50% EXPECTED':'GF / GA / SF / SA · HISTORICAL RESULTS';
   $('rosterCardSeason').textContent=clean($('rosterCustomSubtitle').value)||displaySeason(s);
   $('rosterCardTitle').textContent=clean($('rosterCustomTitle').value)||'Projected Lineup';
   setTeamLogo($('rosterCardLogo'),$('rosterCardTeamLogo').value);
