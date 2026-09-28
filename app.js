@@ -115,6 +115,7 @@ function bindEvents(){
   $('playerSelect').addEventListener('change',()=>{syncPlayerSeason();renderPlayer();});$('playerSeason').addEventListener('change',renderPlayer);$('timelineMetric').addEventListener('change',renderTimeline);
   $('showPlayerLogo').addEventListener('change',()=>updatePlayerLogo(currentPlayerRow()));
   $('comparePlayerA').addEventListener('change',()=>{syncCompareSeasons('A');renderCompare()});$('comparePlayerB').addEventListener('change',()=>{syncCompareSeasons('B');renderCompare()});$('compareSeasonA').addEventListener('change',renderCompare);$('compareSeasonB').addEventListener('change',renderCompare);
+  $('compareStatsMode').addEventListener('change',renderCompare);
   $('showCompareTimeline').addEventListener('change',renderCompareTimeline);$('compareTimelineMetric').addEventListener('change',renderCompareTimeline);
   $('teamSeason').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();syncTeamList();renderTeamCard()});$('teamSelect').addEventListener('change',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});['teamMinGP','teamPosition'].forEach(id=>$(id).addEventListener('input',renderTeamCard));['teamHighlightA','teamHighlightB'].forEach(id=>$(id).addEventListener('change',renderTeamTable));$('teamAddSearch').addEventListener('input',renderTeamAdjusters);$('teamRemoveSearch').addEventListener('input',renderTeamAdjusters);$('resetTeamChanges').addEventListener('click',()=>{state.teamAddedKey='';state.teamRemoved.clear();renderTeamCard()});
   $('rosterSeason').addEventListener('change',()=>{state.rosterSelected={};state.rosterSlotSeasons={};syncRosterTeamList();buildLineupEditor();renderRosterCard()});$('rosterTeam').addEventListener('change',()=>{buildLineupEditor();renderRosterCard()});$('rosterMinGP').addEventListener('input',()=>{buildLineupEditor();renderRosterCard()});$('clearRosterBtn').addEventListener('click',()=>{state.rosterSelected={};state.rosterSlotSeasons={};state.rosterRookies={};state.rosterSearch={};buildLineupEditor();renderRosterCard()});$('autoTeamBtn').addEventListener('click',autoLoadTeam);$('autoBestBtn').addEventListener('click',autoFillLineup);$('resetRoleBtn').addEventListener('click',()=>{state.roleConfig=defaultRoleConfig();buildRoleSettings();buildLineupEditor();renderRosterCard()});
@@ -156,8 +157,39 @@ function average(a){return a.length?a.reduce((s,v)=>s+num(v),0)/a.length:0}
 function syncCompareSeasons(side){const p=$(`comparePlayer${side}`).value;const seasons=seasonsForPlayer(p);setOptions($(`compareSeason${side}`),seasons.map(s=>opt(s,displaySeason(s))).join(''),seasons[0])}
 function compareRow(side){const p=$(`comparePlayer${side}`).value,s=$(`compareSeason${side}`).value;return (state.byPlayer.get(p)||[]).find(r=>r.season===s)||null}
 function ordinal(n){const lastTwo=n%100;return `${n}${lastTwo>=11&&lastTwo<=13?'th':n%10===1?'st':n%10===2?'nd':n%10===3?'rd':'th'}`}
-function percentile(r,field){const pool=poolForRow(r).map(x=>num(x[field])).sort((a,b)=>a-b);if(!pool.length)return 0;const v=num(r[field]);let below=0,equal=0;for(const x of pool){if(x<v)below++;else if(x===v)equal++}return ((below+.5*equal)/pool.length)*100}
-function renderCompare(){const a=compareRow('A'),b=compareRow('B');if(!a||!b)return;$('compareNameA').textContent=`${a.player} • ${displaySeason(a.season)}`;$('compareNameB').textContent=`${b.player} • ${displaySeason(b.season)}`;setTeamLogo($('compareLogoA'),a.team);setTeamLogo($('compareLogoB'),b.team);setTeamLogo($('compareTimelineLogoA'),a.team);setTeamLogo($('compareTimelineLogoB'),b.team);const metrics=[['Games Played','gp',false,0],['Magpie Score','score',true,2],['Hits','hits',true,0],['Blocked Shots','blocked',true,0],['Takeaways','takeaways',true,0],['Goals For','goalsFor',true,0],['Shots For','shotsFor',true,0],['Goals Against','goalsAgainst',false,0],['Shots Against','shotsAgainst',false,0],['Avg TOI','avgtoi',true,1]];$('comparisonBody').innerHTML=metrics.map(([label,key,higher,d])=>{const av=num(a[key]),bv=num(b[key]),leadA=higher?av>bv:av<bv,leadB=higher?bv>av:bv<av;const pa=key==='gp'?'':`${ordinal(Math.round(percentile(a,key)))} pct`;const pb=key==='gp'?'':`${ordinal(Math.round(percentile(b,key)))} pct`;return `<div class="compare-row"><div class="compare-value ${leadA?'lead':''}"><strong>${fmt(av,d)}</strong>${pa?`<span class="percentile">${pa}</span><span class="compare-meter" aria-hidden="true"><i style="width:${Math.round(percentile(a,key))}%"></i></span>`:''}</div><div class="compare-label">${esc(label)}</div><div class="compare-value right ${leadB?'lead':''}">${pb?`<span class="compare-meter" aria-hidden="true"><i style="width:${Math.round(percentile(b,key))}%"></i></span><span class="percentile">${pb}</span>`:''}<strong>${fmt(bv,d)}</strong></div></div>`}).join('');renderCompareTimeline()}
+function compareMetricValue(r,field,per60=false){
+  if(!per60)return num(r[field]);
+  const minutes=num(r.totalTOI)||num(r.gp)*num(r.avgtoi);
+  return minutes>0?num(r[field])*60/minutes:0;
+}
+function percentile(r,field,per60=false){
+  const pool=poolForRow(r).map(x=>compareMetricValue(x,field,per60)).sort((a,b)=>a-b);
+  if(!pool.length)return 0;
+  const value=compareMetricValue(r,field,per60);
+  let below=0,equal=0;
+  for(const x of pool){if(x<value)below++;else if(x===value)equal++}
+  return ((below+.5*equal)/pool.length)*100;
+}
+function renderCompare(){
+  const a=compareRow('A'),b=compareRow('B');if(!a||!b)return;
+  $('compareNameA').textContent=`${a.player} • ${displaySeason(a.season)}`;
+  $('compareNameB').textContent=`${b.player} • ${displaySeason(b.season)}`;
+  setTeamLogo($('compareLogoA'),a.team);setTeamLogo($('compareLogoB'),b.team);
+  setTeamLogo($('compareTimelineLogoA'),a.team);setTeamLogo($('compareTimelineLogoB'),b.team);
+  const per60=$('compareStatsMode').value==='per60';
+  const metrics=[['Games Played','gp',true,0],['Magpie Score','score',true,2],['Hits','hits',true,0],['Blocked Shots','blocked',true,0],['Takeaways','takeaways',true,0],['Goals For','goalsFor',true,0],['Shots For','shotsFor',true,0],['Goals Against','goalsAgainst',false,0],['Shots Against','shotsAgainst',false,0],['Avg TOI','avgtoi',true,1]];
+  $('comparisonBody').innerHTML=metrics.map(([label,key,higher,decimals])=>{
+    const isRate=per60&&key!=='gp'&&key!=='score'&&key!=='avgtoi';
+    const av=compareMetricValue(a,key,isRate),bv=compareMetricValue(b,key,isRate);
+    const leadA=higher?av>bv:av<bv,leadB=higher?bv>av:bv<av;
+    const ap=key==='gp'?null:Math.round(percentile(a,key,isRate));
+    const bp=key==='gp'?null:Math.round(percentile(b,key,isRate));
+    const left=ap===null?'':`<span class="percentile">${ordinal(ap)} pct</span><span class="compare-meter" aria-hidden="true"><i style="width:${ap}%"></i></span>`;
+    const right=bp===null?'':`<span class="compare-meter" aria-hidden="true"><i style="width:${bp}%"></i></span><span class="percentile">${ordinal(bp)} pct</span>`;
+    return `<div class="compare-row"><div class="compare-value ${leadA?'lead':''}"><strong>${fmt(av,isRate?2:decimals)}</strong>${left}</div><div class="compare-label">${esc(label)}${isRate?' /60':''}</div><div class="compare-value right ${leadB?'lead':''}">${right}<strong>${fmt(bv,isRate?2:decimals)}</strong></div></div>`;
+  }).join('');
+  renderCompareTimeline();
+}
 
 function renderCompareTimeline(){const card=$('compareTimelineCard');card.classList.toggle('hidden',!$('showCompareTimeline').checked);$('exportCompareTimeline').classList.toggle('hidden',!$('showCompareTimeline').checked);if(!$('showCompareTimeline').checked)return;const a=compareRow('A'),b=compareRow('B');if(!a||!b)return;const metric=$('compareTimelineMetric').value,years=[...new Set([...(state.byPlayer.get(a.player)||[]),...(state.byPlayer.get(b.player)||[])].map(r=>Number(r.season)))].sort((x,y)=>x-y);const chart=$('compareTimelineChart');chart.innerHTML='';$('compareTimelineTitle').textContent=metricLabel(metric);$('compareLegendA').textContent=a.player;$('compareLegendB').textContent=b.player;const records=[a,b].map(r=>new Map((state.byPlayer.get(r.player)||[]).map(x=>[Number(x.season),metricVal(x,metric)])));const values=records.flatMap(m=>[...m.values()]);const max=Math.max(1,...values)*1.12,W=1000,H=330,L=62,R=25,T=25,B=48;const x=i=>L+(years.length===1?(W-L-R)/2:i*(W-L-R)/(years.length-1)),y=v=>T+(max-v)/max*(H-T-B);for(let i=0;i<=4;i++){const yy=T+i*(H-T-B)/4;chart.append(svg('line',{x1:L,y1:yy,x2:W-R,y2:yy,class:'chart-grid'}));const tx=svg('text',{x:L-10,y:yy+4,'text-anchor':'end',class:'chart-axis'});tx.textContent=fmt(max*(1-i/4),metric==='score'?1:0);chart.append(tx)}years.forEach((year,i)=>{const tx=svg('text',{x:x(i),y:H-18,'text-anchor':'middle',class:'chart-axis'});tx.textContent=year;chart.append(tx)});records.forEach((m,side)=>{let path='';years.forEach((year,i)=>{if(m.has(year)){path+=`${path&&m.has(years[i-1])?'L':'M'} ${x(i)} ${y(m.get(year))} `}});chart.append(svg('path',{d:path,class:side?'chart-compare-b':'chart-player'}));years.forEach((year,i)=>{if(!m.has(year))return;const dot=svg('circle',{cx:x(i),cy:y(m.get(year)),r:4,class:side?'chart-compare-dot-b':'chart-dot'});const title=svg('title');title.textContent=`${side?b.player:a.player} ${displaySeason(year)}: ${fmt(m.get(year),metric==='score'?2:0)}`;dot.append(title);chart.append(dot)})})}
 
