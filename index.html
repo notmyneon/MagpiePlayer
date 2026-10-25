@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=22">
 </head>
 <body>
   <div class="app-shell">
@@ -107,6 +107,7 @@
         <div class="control-grid panel rankings-controls">
           <label>Season<select id="rankingsSeason"></select></label>
           <label>Ranking card<select id="rankingsMode"><option value="magpie-top">Top 20 · Magpie Score</option><option value="hits-top">Top 20 · Hits</option><option value="blocked-top">Top 20 · Blocked Shots</option><option value="takeaways-top">Top 20 · Takeaways</option><option value="magpie-bottom">Bottom 20 · Magpie Score</option></select></label>
+          <label>Position<select id="rankingsPosition"><option value="both">Both</option><option value="F">Forwards</option><option value="D">Defence</option></select></label>
           <label class="gp-slider-label">Minimum games played <output id="rankingsGPValue" for="rankingsMinGP">5 GP</output><input id="rankingsMinGP" type="range" min="1" max="82" step="1" value="5"><span class="gp-slider-ends"><span>1 GP</span><span id="rankingsGPMax">82 GP</span></span></label>
         </div>
         <div class="download-actions"><button type="button" class="button ghost" data-export-card="rankingsCard">Download rankings PNG</button></div>
@@ -188,6 +189,6 @@
   <div class="download-status" id="downloadStatus" role="status" aria-live="polite"></div>
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
   <script src="assets/vendor/html-to-image-1.11.13.js"></script>
-  <script src="app.js?v=19"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>

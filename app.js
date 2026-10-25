@@ -110,7 +110,7 @@ function populateAllControls(){
 }
 
 function bindEvents(){
-  $('rankingsSeason').addEventListener('change',()=>{syncRankingsSlider();renderRankings()});$('rankingsMode').addEventListener('change',renderRankings);$('rankingsMinGP').addEventListener('input',renderRankings);
+  $('rankingsSeason').addEventListener('change',()=>{syncRankingsSlider();renderRankings()});$('rankingsMode').addEventListener('change',renderRankings);$('rankingsPosition').addEventListener('change',renderRankings);$('rankingsMinGP').addEventListener('input',renderRankings);
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
   $('playerSearch').addEventListener('input',()=>{const q=clean($('playerSearch').value).toLowerCase();const names=playerNames().filter(p=>p.toLowerCase().includes(q));const prev=$('playerSelect').value;setOptions($('playerSelect'),names.slice(0,250).map(n=>opt(n)).join(''),names.includes(prev)?prev:names[0]);syncPlayerSeason();renderPlayer();});
   $('playerSelect').addEventListener('change',()=>{syncPlayerSeason();renderPlayer();});$('playerSeason').addEventListener('change',renderPlayer);$('timelineMetric').addEventListener('change',renderTimeline);
@@ -295,20 +295,20 @@ const rankingsModes={
  'magpie-bottom':{title:'Bottom 20 · Magpie Score',metric:'score',label:'MAGPIE',ascending:true}
 };
 function syncRankingsSlider(){const season=$('rankingsSeason').value,max=Math.max(1,...state.rows.filter(r=>r.season===season).map(r=>r.gp)),slider=$('rankingsMinGP');slider.max=String(max);slider.value=String(Math.max(1,Math.min(max,num(slider.value)||5)));$('rankingsGPMax').textContent=`${max} GP`;}
-function rankedPlayers(season,mode,minGP){const config=rankingsModes[mode]||rankingsModes['magpie-top'];return state.rows.filter(r=>r.season===season&&r.gp>=minGP&&Number.isFinite(r[config.metric])).slice().sort((a,b)=>(config.ascending?a[config.metric]-b[config.metric]:b[config.metric]-a[config.metric])||b.gp-a.gp||a.player.localeCompare(b.player)||a.key.localeCompare(b.key));}
+function rankedPlayers(season,mode,minGP,position='both'){const config=rankingsModes[mode]||rankingsModes['magpie-top'];return state.rows.filter(r=>r.season===season&&r.gp>=minGP&&(position==='both'||r.position===position)&&Number.isFinite(r[config.metric])).slice().sort((a,b)=>(config.ascending?a[config.metric]-b[config.metric]:b[config.metric]-a[config.metric])||b.gp-a.gp||a.player.localeCompare(b.player)||a.key.localeCompare(b.key));}
 function renderRankings(){
- const season=$('rankingsSeason').value,mode=$('rankingsMode').value||'magpie-top',config=rankingsModes[mode],minGP=Math.max(1,num($('rankingsMinGP').value)||1),eligible=rankedPlayers(season,mode,minGP),shown=eligible.slice(0,20);
- $('rankingsGPValue').textContent=`${minGP} GP`;$('rankingsMinGP').setAttribute('aria-valuetext',`${minGP} games minimum`);$('rankingsCardSeason').textContent=`NHL · ${displaySeason(season)}`;$('rankingsCardTitle').textContent=config.title;$('rankingsCardContext').textContent=config.metric==='score'?'Magpie Score · All NHL skaters':'Season totals · All NHL skaters';
+ const season=$('rankingsSeason').value,mode=$('rankingsMode').value||'magpie-top',config=rankingsModes[mode],minGP=Math.max(1,num($('rankingsMinGP').value)||1),position=$('rankingsPosition').value||'both',positionLabel=position==='F'?'Forwards':position==='D'?'Defence':'Forwards & Defence',eligible=rankedPlayers(season,mode,minGP,position),shown=eligible.slice(0,20);
+ $('rankingsGPValue').textContent=`${minGP} GP`;$('rankingsMinGP').setAttribute('aria-valuetext',`${minGP} games minimum`);$('rankingsCardSeason').textContent=`NHL · ${displaySeason(season)}`;$('rankingsCardTitle').textContent=config.title;$('rankingsCardContext').textContent=(config.metric==='score'?'Magpie Score':'Season totals')+' · '+positionLabel;
  const row=(r,i)=>`<div class="ranking-row ${i<3?'ranking-podium':''}"><span class="ranking-place">${i+1}</span><div class="ranking-player"><img data-rank-team="${esc(r.team)}" class="ranking-team-logo" alt=""><div><strong>${esc(r.player)}</strong><small>${esc(r.team)} · ${r.position}</small></div></div><span class="ranking-gp">${whole(r.gp)}</span><strong class="ranking-value">${config.metric==='score'?fmt(r.score):whole(r[config.metric])}</strong></div>`;
  const column=(start,end)=>`<div class="ranking-column"><div class="ranking-table-head"><span>#</span><span>PLAYER</span><span>GP</span><span>${config.label}</span></div>${shown.slice(start,end).map((r,i)=>row(r,start+i)).join('')}</div>`;
  $('rankingsRows').innerHTML=shown.length?column(0,10)+(shown.length>10?column(10,20):''):'<div class="rankings-empty">No players meet this games-played minimum.</div>';
  $('rankingsRows').querySelectorAll('[data-rank-team]').forEach(img=>setTeamLogo(img,img.dataset.rankTeam));
- $('rankingsFooter').textContent=`Minimum ${minGP} GP · ${eligible.length.toLocaleString()} qualifying players${shown.length<20?' · Showing '+shown.length:''}`;
+ $('rankingsFooter').textContent=`${positionLabel} · Minimum ${minGP} GP · ${eligible.length.toLocaleString()} qualifying players${shown.length<20?' · Showing '+shown.length:''}`;
 }
 
 function exportCardName(id){
   const player=$('playerSelect').value,season=displaySeason($('playerSeason').value),a=$('comparePlayerA').value,b=$('comparePlayerB').value;
-  const names={rankingsCard:`NHL-${displaySeason($('rankingsSeason').value)}-${$('rankingsMode').value}-min-${$('rankingsMinGP').value}-GP`,playerCard:`${player}-${season}-magpie-card`,playerTimelineCard:`${player}-career-timeline`,comparisonCard:`${a}-vs-${b}-comparison`,compareTimelineCard:`${a}-vs-${b}-timeline`,teamCard:`${fullSeason($('teamSeason').value)}-${teamName($('teamSelect').value)}-team-card`,rosterCard:`${$('rosterCustomTitle').value}-${$('rosterCustomSubtitle').value||displaySeason($('rosterSeason').value)}-lineup`};
+  const names={rankingsCard:`NHL-${displaySeason($('rankingsSeason').value)}-${$('rankingsMode').value}-${$('rankingsPosition').value||'both'}-min-${$('rankingsMinGP').value}-GP`,playerCard:`${player}-${season}-magpie-card`,playerTimelineCard:`${player}-career-timeline`,comparisonCard:`${a}-vs-${b}-comparison`,compareTimelineCard:`${a}-vs-${b}-timeline`,teamCard:`${fullSeason($('teamSeason').value)}-${teamName($('teamSelect').value)}-team-card`,rosterCard:`${$('rosterCustomTitle').value}-${$('rosterCustomSubtitle').value||displaySeason($('rosterSeason').value)}-lineup`};
   return `${clean(names[id]||'magpie-card').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,100)||'magpie-card'}.png`;
 }
 async function downloadCard(button){
