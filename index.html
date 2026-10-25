@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=20">
+  <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
   <div class="app-shell">
@@ -17,6 +17,7 @@
       <nav class="tabs" aria-label="Main navigation">
         <button data-view="players" class="tab active">Players</button>
         <button data-view="compare" class="tab">Compare</button>
+        <button data-view="rankings" class="tab">NHL Rankings</button>
         <button data-view="teams" class="tab">Team Cards</button>
         <button data-view="roster" class="tab">Roster Builder</button>
       </nav>
@@ -101,6 +102,21 @@
         <article class="comparison-timeline card-surface" id="compareTimelineCard"><div class="section-title-row"><div class="compare-timeline-heading"><img class="magpie-logo" alt="Magpie Hockey logo"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="compareTimelineTitle">Head to head</h2></div></div><div class="compare-legend"><span><img id="compareTimelineLogoA" class="player-team-logo hidden" alt=""><i class="compare-line-a"></i><b id="compareLegendA">Player One</b></span><span><img id="compareTimelineLogoB" class="player-team-logo hidden" alt=""><i class="compare-line-b"></i><b id="compareLegendB">Player Two</b></span></div></div><div class="chart-wrap"><svg id="compareTimelineChart" viewBox="0 0 1000 330" preserveAspectRatio="none" role="img" aria-label="Two player career timeline"></svg></div></article>
       </section>
 
+      <section class="view" id="view-rankings" data-view-panel="rankings">
+        <div class="page-head"><div><div class="eyebrow">LEAGUE LEADERS</div><h1>NHL <span>Player Rankings</span></h1><p>Season-wide rankings across all NHL skaters. Set the minimum games played and choose a card.</p></div></div>
+        <div class="control-grid panel rankings-controls">
+          <label>Season<select id="rankingsSeason"></select></label>
+          <label>Ranking card<select id="rankingsMode"><option value="magpie-top">Top 20 · Magpie Score</option><option value="hits-top">Top 20 · Hits</option><option value="blocked-top">Top 20 · Blocked Shots</option><option value="takeaways-top">Top 20 · Takeaways</option><option value="magpie-bottom">Bottom 20 · Magpie Score</option></select></label>
+          <label class="gp-slider-label">Minimum games played <output id="rankingsGPValue" for="rankingsMinGP">5 GP</output><input id="rankingsMinGP" type="range" min="1" max="82" step="1" value="5"><span class="gp-slider-ends"><span>1 GP</span><span id="rankingsGPMax">82 GP</span></span></label>
+        </div>
+        <div class="download-actions"><button type="button" class="button ghost" data-export-card="rankingsCard">Download rankings PNG</button></div>
+        <article class="card-surface rankings-card" id="rankingsCard">
+          <div class="rankings-card-head"><div><div class="eyebrow" id="rankingsCardSeason">NHL</div><h2 id="rankingsCardTitle">Top 20 · Magpie Score</h2><p id="rankingsCardContext"></p></div><img class="magpie-logo" alt="Magpie Hockey logo"></div>
+          <div class="ranking-columns" id="rankingsRows"></div>
+          <div class="rankings-card-footer" id="rankingsFooter"></div>
+        </article>
+      </section>
+
       <section class="view" id="view-teams" data-view-panel="teams">
         <div class="page-head">
           <div><div class="eyebrow">TEAM CARDS</div><h1>See the <span>entire team</span></h1><p>Rank the roster by Magpie Score, showcase key players, or simulate a new signing or trade before the source data catches up.</p></div>
@@ -172,6 +188,6 @@
   <div class="download-status" id="downloadStatus" role="status" aria-live="polite"></div>
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
   <script src="assets/vendor/html-to-image-1.11.13.js"></script>
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
