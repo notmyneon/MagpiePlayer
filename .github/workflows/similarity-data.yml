@@ -1,0 +1,32 @@
+name: Refresh player similarity data
+on:
+  workflow_dispatch:
+  push:
+    paths: ['scripts/build_similarity.py', 'data/similarity/current-*.csv']
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: player-similarity-data
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/build_similarity.py
+      - name: Save checked supplementary data
+        run: |
+          git config user.name 'Magpie stats bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/similarity/supplement.csv data/similarity/coverage.json
+          git diff --cached --quiet || git commit -m 'Refresh checked player scoring and discipline stats'
+          git pull --rebase origin main
+          git push
