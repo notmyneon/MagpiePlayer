@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050708">
   <title>Magpie Score</title>
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
   <div class="app-shell">
@@ -17,6 +17,7 @@
       <nav class="tabs" aria-label="Main navigation">
         <button data-view="players" class="tab active">Players</button>
         <button data-view="compare" class="tab">Compare</button>
+        <button data-view="similarity" class="tab">Similarity</button>
         <button data-view="rankings" class="tab">NHL Rankings</button>
         <button data-view="teams" class="tab">Team Cards</button>
         <button data-view="roster" class="tab">Roster Builder</button>
@@ -100,6 +101,23 @@
           <div class="comparison-body" id="comparisonBody"></div>
         </article>
         <article class="comparison-timeline card-surface" id="compareTimelineCard"><div class="section-title-row"><div class="compare-timeline-heading"><img class="magpie-logo" alt="Magpie Hockey logo"><div><div class="eyebrow">CAREER TIMELINE</div><h2 id="compareTimelineTitle">Head to head</h2></div></div><div class="compare-legend"><span><img id="compareTimelineLogoA" class="player-team-logo hidden" alt=""><i class="compare-line-a"></i><b id="compareLegendA">Player One</b></span><span><img id="compareTimelineLogoB" class="player-team-logo hidden" alt=""><i class="compare-line-b"></i><b id="compareLegendB">Player Two</b></span></div></div><div class="chart-wrap"><svg id="compareTimelineChart" viewBox="0 0 1000 330" preserveAspectRatio="none" role="img" aria-label="Two player career timeline"></svg></div></article>
+      </section>
+
+      <section class="view" id="view-similarity" data-view-panel="similarity">
+        <div class="page-head"><div><div class="eyebrow">FIND A PLAYER'S CLOSEST MATCHES</div><h1>Player <span>Similarity</span></h1><p>Showcase a player and find their 10 closest season or career profiles.</p></div></div>
+        <div class="panel control-grid similarity-controls">
+          <label>Mode<select id="similarityMode"><option value="season">Season</option><option value="career">Career</option></select></label>
+          <label>Search player<input id="similaritySearch" type="search" placeholder="Player name…" autocomplete="off"></label>
+          <label>Player<select id="similarityPlayer"></select></label>
+          <label id="similaritySeasonLabel">Season<select id="similaritySeason"></select></label>
+          <label id="similarityPoolLabel">Match pool<select id="similarityPool"><option value="all">All available seasons</option><option value="season">Selected season only</option></select></label>
+          <label>Position<select id="similarityPosition"><option value="same">Same position</option><option value="both">Forwards & Defence</option><option value="F">Forwards</option><option value="D">Defence</option></select></label>
+          <label>Minimum candidate GP<input id="similarityMinGP" type="number" min="1" max="3000" step="1" value="10"></label>
+          <label class="similarity-focus-label">Magpie focus <output id="similarityFocusValue" for="similarityFocus">60%</output><input id="similarityFocus" type="range" min="50" max="100" step="5" value="60"></label>
+        </div>
+        <p class="similarity-method" id="similarityMethod"></p>
+        <div class="download-actions"><button type="button" class="button ghost" data-export-card="similarityCard">Download similarity PNG</button></div>
+        <article class="card-surface similarity-card" id="similarityCard"></article>
       </section>
 
       <section class="view" id="view-rankings" data-view-panel="rankings">
@@ -189,6 +207,8 @@
   <div class="download-status" id="downloadStatus" role="status" aria-live="polite"></div>
   <template id="emptyChartTemplate"><text x="500" y="215" text-anchor="middle" class="chart-empty">Select a player to see the timeline</text></template>
   <script src="assets/vendor/html-to-image-1.11.13.js"></script>
-  <script src="app.js?v=20"></script>
+  <script src="similarity.js?v=1"></script>
+  <script src="app.js?v=21"></script>
 </body>
 </html>
+

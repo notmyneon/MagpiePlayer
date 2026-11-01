@@ -68,7 +68,7 @@ async function init(){
     const bad=coreResponses.find(r=>!r.ok); if(bad)throw new Error(`Core season file failed: ${bad.status}`);
     const coreTexts=await Promise.all(coreResponses.map(r=>r.text()));
     state.rawCore=coreTexts.flatMap(csvObjects); state.rows=aggregateCore(state.rawCore);
-    buildIndexes(); populateAllControls(); bindEvents(); renderAll();
+    buildIndexes(); populateAllControls(); await initPlayerSimilarity(); bindEvents(); renderAll();
     $('dataStatus').className='data-status ready'; $('dataStatus').lastElementChild.textContent=`${state.rows.length.toLocaleString()} player seasons ready`;
   }catch(err){console.error(err);$('dataStatus').className='data-status error';$('dataStatus').lastElementChild.textContent='Data failed to load';}
 }
@@ -125,10 +125,10 @@ function bindEvents(){
   $('rosterCardTeamLogo').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterLogo',$('rosterCardTeamLogo').value)}catch(_){}renderRosterCard()});
   $('rosterStatMode').addEventListener('change',()=>{try{localStorage.setItem('magpieRosterStatMode',$('rosterStatMode').value)}catch(_){}buildLineupEditor();renderRosterCard()});
   document.querySelectorAll('[data-export-card]').forEach(button=>button.addEventListener('click',()=>downloadCard(button)));
-  window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['players','compare','teams','roster','rankings'].includes(v))switchView(v,false)});
+  window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['players','compare','teams','roster','rankings','similarity'].includes(v))switchView(v,false)});
 }
-function switchView(v,setHash=true){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.viewPanel===v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(setHash)history.replaceState(null,'',`#${v}`);if(v==='players')renderPlayer();if(v==='compare')renderCompare();if(v==='teams')renderTeamCard();if(v==='roster')renderRosterCard();if(v==='rankings')renderRankings();}
-function renderAll(){const hash=location.hash.slice(1);if(['players','compare','teams','roster','rankings'].includes(hash))switchView(hash,false);else switchView('players',false);renderPlayer();renderCompare();renderTeamCard();renderRosterCard();renderRankings();}
+function switchView(v,setHash=true){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.viewPanel===v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(setHash)history.replaceState(null,'',`#${v}`);if(v==='players')renderPlayer();if(v==='compare')renderCompare();if(v==='teams')renderTeamCard();if(v==='roster')renderRosterCard();if(v==='rankings')renderRankings();if(v==='similarity')renderPlayerSimilarity();}
+function renderAll(){const hash=location.hash.slice(1);if(['players','compare','teams','roster','rankings','similarity'].includes(hash))switchView(hash,false);else switchView('players',false);renderPlayer();renderCompare();renderTeamCard();renderRosterCard();renderRankings();}
 
 function syncPlayerSeason(){const p=$('playerSelect').value;const seasons=seasonsForPlayer(p);setOptions($('playerSeason'),seasons.map(s=>opt(s,displaySeason(s))).join(''),seasons[0]);}
 function currentPlayerRow(){const p=$('playerSelect').value,s=$('playerSeason').value;return (state.byPlayer.get(p)||[]).find(r=>r.season===s)||null}
@@ -308,7 +308,7 @@ function renderRankings(){
 
 function exportCardName(id){
   const player=$('playerSelect').value,season=displaySeason($('playerSeason').value),a=$('comparePlayerA').value,b=$('comparePlayerB').value;
-  const names={rankingsCard:`NHL-${displaySeason($('rankingsSeason').value)}-${$('rankingsMode').value}-${$('rankingsPosition').value||'both'}-min-${$('rankingsMinGP').value}-GP`,playerCard:`${player}-${season}-magpie-card`,playerTimelineCard:`${player}-career-timeline`,comparisonCard:`${a}-vs-${b}-comparison`,compareTimelineCard:`${a}-vs-${b}-timeline`,teamCard:`${fullSeason($('teamSeason').value)}-${teamName($('teamSelect').value)}-team-card`,rosterCard:`${$('rosterCustomTitle').value}-${$('rosterCustomSubtitle').value||displaySeason($('rosterSeason').value)}-lineup`};
+  const names={similarityCard:`${similarityReference()?.player||'Player'}-${$('similarityMode').value}-${$('similarityMode').value==='career'?'career':displaySeason($('similaritySeason').value)}-similar-players`,rankingsCard:`NHL-${displaySeason($('rankingsSeason').value)}-${$('rankingsMode').value}-${$('rankingsPosition').value||'both'}-min-${$('rankingsMinGP').value}-GP`,playerCard:`${player}-${season}-magpie-card`,playerTimelineCard:`${player}-career-timeline`,comparisonCard:`${a}-vs-${b}-comparison`,compareTimelineCard:`${a}-vs-${b}-timeline`,teamCard:`${fullSeason($('teamSeason').value)}-${teamName($('teamSelect').value)}-team-card`,rosterCard:`${$('rosterCustomTitle').value}-${$('rosterCustomSubtitle').value||displaySeason($('rosterSeason').value)}-lineup`};
   return `${clean(names[id]||'magpie-card').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,100)||'magpie-card'}.png`;
 }
 async function downloadCard(button){
@@ -342,3 +342,4 @@ async function downloadCard(button){
 }
 
 init();
+
