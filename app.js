@@ -337,11 +337,53 @@ function clearPngLink(status){
  if(status.dataset.pngUrl){URL.revokeObjectURL(status.dataset.pngUrl);delete status.dataset.pngUrl;}
  status.replaceChildren();
 }
+async function renderTimelinePng(card){
+  const chart=card.querySelector('#timelineChart');
+  if(!chart?.children.length)throw new Error('Select a player first');
+  const copy=chart.cloneNode(true);
+  const live=chart.querySelectorAll('line,path,circle,text');
+  copy.querySelectorAll('line,path,circle,text').forEach((part,i)=>{
+    const style=getComputedStyle(live[i]);
+    part.removeAttribute('class');
+    for(const key of ['fill','stroke','stroke-width','stroke-dasharray','stroke-linecap','stroke-linejoin','font-weight','font-size']){
+      part.style.setProperty(key,style.getPropertyValue(key));
+    }
+    part.style.fontFamily='system-ui, sans-serif';
+  });
+  copy.setAttribute('width','1000');copy.setAttribute('height','420');
+  const chartImage=new Image();
+  chartImage.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(copy));
+  await chartImage.decode();
+  const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=744;
+  const ctx=canvas.getContext('2d');
+  const gradient=ctx.createLinearGradient(0,0,1200,744);
+  gradient.addColorStop(0,'#102529');gradient.addColorStop(1,'#0d1416');ctx.fillStyle=gradient;ctx.fillRect(0,0,1200,744);
+  ctx.fillStyle='#00d5c7';ctx.fillRect(0,0,1200,3);
+  const images=[...card.querySelectorAll('img:not(.hidden)')].filter(img=>{
+    try{const url=new URL(img.currentSrc||img.src,location.href);return url.origin===location.origin||url.protocol==='data:'}catch{return false}
+  });
+  await Promise.all(images.map(img=>waitForPngAsset(img.decode())));
+  let right=1154;
+  for(const img of images){if(!img.naturalWidth)continue;const size=Math.min(60,60*img.naturalWidth/img.naturalHeight);ctx.drawImage(img,right-size,34,size,size*img.naturalHeight/img.naturalWidth);right-=size+16;}
+  ctx.font='bold 15px system-ui';ctx.fillStyle='#00d5c7';ctx.fillText('CAREER TIMELINE',42,51);
+  ctx.font='bold 35px system-ui';ctx.fillStyle='#f7ffff';ctx.fillText(card.querySelector('#timelineTitle').textContent,42,99,Math.max(600,right-64));
+  const legend=(label,color,x)=>{ctx.fillStyle=color;ctx.fillRect(x,134,27,3);ctx.fillStyle='#c7dadb';ctx.font='16px system-ui';ctx.fillText(label,x+37,141);};
+  legend('Player','#00d5c7',42);legend('Position avg.','#88999a',152);
+  ctx.fillStyle='#0b1518';ctx.fillRect(42,167,1116,485);
+  ctx.drawImage(chartImage,42,175,1116,468);
+  ctx.fillStyle='#d4e2e3';ctx.font='bold 17px system-ui';
+  ctx.fillText([...card.querySelectorAll('.summary-pill')].map(el=>el.textContent).join('   •   '),42,698,1116);
+  return canvas;
+}
 async function downloadCard(button){
   const card=$(button.dataset.exportCard);if(!card||card.classList.contains('hidden')||button.disabled)return;
   button.disabled=true;const originalText=button.textContent;button.textContent='Creating PNG…';clearPngLink($('downloadStatus'));$('downloadStatus').textContent='Creating image…';
   const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-20000px;top:0;width:900px;pointer-events:none';
   try{
+    if(card.id==='playerTimelineCard'){
+      const timeline=await renderTimelinePng(card);const blob=await new Promise(resolve=>timeline.toBlob(resolve,'image/png'));
+      if(!blob)throw new Error('PNG encoding failed');offerPng($('downloadStatus'),blob,exportCardName(card.id));return;
+    }
     if(!window.htmlToImage)throw new Error('Image renderer unavailable');
     const copy=card.cloneNode(true);copy.classList.add('export-card');copy.style.width='900px';copy.style.maxWidth='none';copy.style.margin='0';copy.style.position='relative';copy.style.top='auto';
     // SVG presentation styles can disappear when the chart is serialized into an image.
