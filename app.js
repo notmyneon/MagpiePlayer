@@ -375,13 +375,68 @@ async function renderTimelinePng(card){
   ctx.fillText([...card.querySelectorAll('.summary-pill')].map(el=>el.textContent).join('   •   '),42,698,1116);
   return canvas;
 }
+async function renderPlayerCardPng(card){
+  if(!currentPlayerRow())throw new Error('Select a player first');
+  const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=698;
+  const ctx=canvas.getContext('2d');
+  const mint='#00d5c7',white='#f7ffff',muted='#9db0b4';
+  const text=(value,x,y,size,color=white,bold=false,maxWidth=1100)=>{
+    ctx.fillStyle=color;ctx.font=(bold?'700 ':'')+size+'px system-ui, sans-serif';
+    ctx.fillText(value,x,y,maxWidth);
+  };
+  const box=(x,y,w,h,r,fill,stroke)=>{
+    ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}
+  };
+  const label=id=>card.querySelector('#'+id).textContent.trim();
+  const gradient=ctx.createLinearGradient(0,0,1200,698);
+  gradient.addColorStop(0,'#102629');gradient.addColorStop(1,'#0d1416');
+  ctx.fillStyle=gradient;ctx.fillRect(0,0,1200,698);
+  ctx.fillStyle=mint;ctx.fillRect(0,0,1200,4);
+  const images=[card.querySelector('.magpie-logo'),card.querySelector('#playerTeamLogo')];
+  const ready=await Promise.all(images.map(async img=>{
+    if(!img||img.classList.contains('hidden')||!img.getAttribute('src'))return null;
+    try{
+      const url=new URL(img.currentSrc||img.src,location.href);
+      if(url.origin!==location.origin&&url.protocol!=='data:')return null;
+      return await waitForPngAsset(img.decode().then(()=>img))||null;
+    }catch{return null;}
+  }));
+  const logo=(img,x,y,size)=>{
+    if(!img?.naturalWidth||!img.naturalHeight)return;
+    const scale=size/Math.max(img.naturalWidth,img.naturalHeight);
+    const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+    ctx.drawImage(img,x+(size-w)/2,y+(size-h)/2,w,h);
+  };
+  logo(ready[0],43,32,64);
+  text('MAGPIE SCORE',126,60,24,mint,true);
+  text(label('playerCardSeason'),126,86,17,muted,true);
+  logo(ready[1],45,137,80);
+  const nameX=ready[1]?147:44;
+  text(label('playerCardName'),nameX,183,48,white,true,880-nameX);
+  text(label('playerCardMeta'),nameX,219,20,muted,false,880-nameX);
+  box(912,110,244,126,20,'#0a1b1e','#235456');
+  text('MAGPIE',933,138,13,muted,true);
+  text(label('playerScore'),932,187,48,mint,true,201);
+  text(label('playerRank'),933,215,14,muted,false,202);
+  for(const [i,stat] of [...card.querySelectorAll('.stat-box')].entries()){
+    const x=44+(i%4)*282,y=274+Math.floor(i/4)*196;
+    const primary=stat.classList.contains('focus');
+    box(x,y,266,174,14,primary?'#112c2e':'#101c1f',primary?'#225457':'#26363a');
+    text(stat.querySelector('span').textContent.trim(),x+19,y+36,18,muted,true,228);
+    text(stat.querySelector('strong').textContent.trim(),x+19,y+101,44,primary?mint:white,true,228);
+    text(stat.querySelector('small').textContent.trim(),x+19,y+144,16,muted,false,228);
+  }
+  return canvas;
+}
 async function downloadCard(button){
   const card=$(button.dataset.exportCard);if(!card||card.classList.contains('hidden')||button.disabled)return;
   button.disabled=true;const originalText=button.textContent;button.textContent='Creating PNG…';clearPngLink($('downloadStatus'));$('downloadStatus').textContent='Creating image…';
   const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-20000px;top:0;width:900px;pointer-events:none';
   try{
-    if(card.id==='playerTimelineCard'){
-      const timeline=await renderTimelinePng(card);const blob=await new Promise(resolve=>timeline.toBlob(resolve,'image/png'));
+    if(card.id==='playerTimelineCard'||card.id==='playerCard'){
+      const canvas=await (card.id==='playerTimelineCard'?renderTimelinePng(card):renderPlayerCardPng(card));
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
       if(!blob)throw new Error('PNG encoding failed');offerPng($('downloadStatus'),blob,exportCardName(card.id));return;
     }
     if(!window.htmlToImage)throw new Error('Image renderer unavailable');
