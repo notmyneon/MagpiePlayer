@@ -311,9 +311,35 @@ function exportCardName(id){
   const names={similarityCard:`${similarityReference()?.player||'Player'}-${$('similarityMode').value}-${$('similarityMode').value==='career'?'career':displaySeason($('similaritySeason').value)}-similar-players`,rankingsCard:`NHL-${displaySeason($('rankingsSeason').value)}-${$('rankingsMode').value}-${$('rankingsPosition').value||'both'}-min-${$('rankingsMinGP').value}-GP`,playerCard:`${player}-${season}-magpie-card`,playerTimelineCard:`${player}-career-timeline`,comparisonCard:`${a}-vs-${b}-comparison`,compareTimelineCard:`${a}-vs-${b}-timeline`,teamCard:`${fullSeason($('teamSeason').value)}-${teamName($('teamSelect').value)}-team-card`,rosterCard:`${$('rosterCustomTitle').value}-${$('rosterCustomSubtitle').value||displaySeason($('rosterSeason').value)}-lineup`};
   return `${clean(names[id]||'magpie-card').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,100)||'magpie-card'}.png`;
 }
+function waitForPngAsset(promise,ms=2000){
+ return new Promise(resolve=>{const timer=setTimeout(()=>resolve(undefined),ms);Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value)},()=>{clearTimeout(timer);resolve(undefined)});});
+}
+const pngPlaceholder='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+async function preparePngAssets(copy){
+ await Promise.all([waitForPngAsset(document.fonts.ready),...Array.from(copy.querySelectorAll('img'),async img=>{
+   if(!img.getAttribute('src'))return;
+   img.loading='eager';
+   const ready=await waitForPngAsset(img.decode().then(()=>true));
+   if(!ready){img.removeAttribute('srcset');img.src=pngPlaceholder;}
+ })]);
+ const fontEmbedCSS=await waitForPngAsset(window.htmlToImage.getFontEmbedCSS(copy),2500);
+ return {fontEmbedCSS,skipFonts:!fontEmbedCSS,imagePlaceholder:pngPlaceholder};
+}
+function offerPng(status,blob,filename){
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement('a');
+ link.href=url;link.download=filename;link.textContent='Save PNG';link.style.color='inherit';link.style.textDecoration='underline';
+ status.replaceChildren(document.createTextNode('PNG ready. '),link);
+ status.dataset.pngUrl=url;
+ link.click();
+}
+function clearPngLink(status){
+ if(status.dataset.pngUrl){URL.revokeObjectURL(status.dataset.pngUrl);delete status.dataset.pngUrl;}
+ status.replaceChildren();
+}
 async function downloadCard(button){
   const card=$(button.dataset.exportCard);if(!card||card.classList.contains('hidden')||button.disabled)return;
-  button.disabled=true;const originalText=button.textContent;button.textContent='Creating PNG…';$('downloadStatus').textContent='';
+  button.disabled=true;const originalText=button.textContent;button.textContent='Creating PNG…';clearPngLink($('downloadStatus'));$('downloadStatus').textContent='Creating image…';
   const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-20000px;top:0;width:900px;pointer-events:none';
   try{
     if(!window.htmlToImage)throw new Error('Image renderer unavailable');
@@ -330,16 +356,15 @@ async function downloadCard(button){
       }
     });
     stage.append(copy);document.body.append(stage);
-    await document.fonts.ready;
-    await Promise.all([...copy.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));
+    const assets=await preparePngAssets(copy);
     const height=Math.ceil(Math.max(copy.scrollHeight,copy.getBoundingClientRect().height));
-    const canvas=await window.htmlToImage.toCanvas(copy,{width:900,height,canvasWidth:1200,canvasHeight:Math.ceil(height*4/3),pixelRatio:1,backgroundColor:'#0d1416',imagePlaceholder:'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='});
+    const canvas=await window.htmlToImage.toCanvas(copy,{width:900,height,canvasWidth:1200,canvasHeight:Math.ceil(height*4/3),pixelRatio:1,backgroundColor:'#0d1416',...assets});
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');
-    const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=exportCardName(card.id);document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-    $('downloadStatus').textContent=`Downloaded ${link.download}`;
+    offerPng($('downloadStatus'),blob,exportCardName(card.id));
   }catch(error){console.error('Card download failed',error);$('downloadStatus').textContent='Could not create the PNG. Please try again.'}
-  finally{stage.remove();button.disabled=false;button.textContent=originalText;setTimeout(()=>{$('downloadStatus').textContent=''},5000)}
+  finally{stage.remove();button.disabled=false;button.textContent=originalText}
 }
 
 init();
+
 
